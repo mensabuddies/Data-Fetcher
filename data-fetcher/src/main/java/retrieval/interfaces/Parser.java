@@ -1,6 +1,7 @@
 package retrieval.interfaces;
 
 import org.jsoup.nodes.Element;
+import retrieval.CanteenParser;
 import retrieval.DayParser;
 import retrieval.MealParser;
 
@@ -13,4 +14,6 @@ public interface Parser<T>{
         return new MealParser();
     }
     static DayParser createDayParser() { return new DayParser(createMealParser()); }
+
+    static CanteenParser createCanteenParser() { return new CanteenParser(); }
 }
