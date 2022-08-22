@@ -1,56 +1,47 @@
 package dataclasses;
+import dataclasses.interfaces.OpeningHours;
 
-import dataclasses.enums.Weekday;
+import java.time.DayOfWeek;
 
-public class OpeningHours {
-    private Weekday weekday;
+public class OpeningHoursImplementation implements OpeningHours {
+    private DayOfWeek weekday;
     private boolean open;
     private String openingAt;
     private String closingAt;
+
     private String getAMealTill;
 
-    public OpeningHours(){
-        // Empty constructor
+    public OpeningHoursImplementation(DayOfWeek weekday, boolean open, String openingAt, String closingAt, String getAMealTill) {
+        this.weekday = weekday;
+        this.open = open;
+        this.openingAt = openingAt;
+        this.closingAt = closingAt;
+        this.getAMealTill = getAMealTill;
     }
 
-    public Weekday getWeekday() {
+    @Override
+    public DayOfWeek getWeekday() {
         return weekday;
     }
 
-    public void setWeekday(Weekday weekday) {
-        this.weekday = weekday;
-    }
-
+    @Override
     public boolean isOpen() {
         return open;
     }
 
-    public void setOpen(boolean open) {
-        this.open = open;
-    }
-
+    @Override
     public String getOpeningAt() {
         return openingAt;
     }
 
-    public void setOpeningAt(String openingAt) {
-        this.openingAt = openingAt;
-    }
-
+    @Override
     public String getClosingAt() {
         return closingAt;
     }
 
-    public void setClosingAt(String closingAt) {
-        this.closingAt = closingAt;
-    }
-
+    @Override
     public String getGetAMealTill() {
         return getAMealTill;
-    }
-
-    public void setGetAMealTill(String getAMealTill) {
-        this.getAMealTill = getAMealTill;
     }
 
     @Override

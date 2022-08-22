@@ -14,4 +14,5 @@ public interface Fetcher {
     static Fetcher createJSOUPFetcher(String url) {
         return new JsoupFetcher(url);
     }
+
 }
