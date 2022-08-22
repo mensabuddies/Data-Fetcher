@@ -96,16 +96,21 @@ public class CanteenFetcher {
             // Do we have opening hours?
             if (tableRowItems.size() > 2) {
                 String[] hours = tableRowItems.get(1).text().split(" - | ");
-                String mealOutTill = tableRowItems.get(2).text().split(" ")[2];
+                String mealOutTill = "";
+                if(!tableRowItems.get(2).text().isEmpty()){
+                     mealOutTill = tableRowItems.get(2).text().split(" ")[2];
+                }
                 int numberOfLoopExecutions = weekdaysToIteratorNumber(tableRowItems.get(0).text());
 
                 for (int i = 0; i < numberOfLoopExecutions; i++) {
                     OpeningHours h = new OpeningHours();
                     h.setWeekday(Weekday.values()[weekdayCounter]);
                     h.setOpen(true);
-                    if (hours.length > 0) {
+                    if (hours.length > 0 && !hours[0].equals("geschlossen")) {
                         h.setOpeningAt(hours[0]);
                         h.setClosingAt(hours[1]);
+                    } else {
+                        h.setOpen(false);
                     }
                     h.setGetAMealTill(mealOutTill);
                     weekdayCounter++;
@@ -130,7 +135,7 @@ public class CanteenFetcher {
     }
 
     private int weekdaysToIteratorNumber(String weekdays) {
-        if (weekdays.equals("Mo-Fr"))
+        if (weekdays.equals("Mo - Fr"))
             return 5;
         if (weekdays.length() == 2)
             return 1;
