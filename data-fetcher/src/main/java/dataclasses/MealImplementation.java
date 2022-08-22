@@ -1,24 +1,22 @@
 package dataclasses;
 
-import dataclasses.enums.Role;
 import dataclasses.interfaces.Meal;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 
 public class MealImplementation implements Meal {
     private final String name;
-    private final int[] prices;
+    private final int price;
 
-    public MealImplementation(String name, int priceStudent, int priceGuest, int priceEmployee) {
+    private final String ingreadientsRaw;
+
+    public MealImplementation(String name, int price, String ingreadientsRaw) {
         this.name = name;
-        this.prices = new int[3];
-        prices[Role.STUDENT.ordinal()] = priceStudent;
-        prices[Role.GUEST.ordinal()] = priceGuest;
-        prices[Role.EMPLOYEE.ordinal()] = priceEmployee;
+        this.price = price;
+        this.ingreadientsRaw = ingreadientsRaw;
     }
 
     @Override
@@ -28,27 +26,30 @@ public class MealImplementation implements Meal {
     }
 
     @Override
-    public int getPrice(Role role) {
-        return prices[role.ordinal()];
+    public int getPrice() {
+        return price;
+    }
+
+    @Override
+    public String getIngreadientsRaw() {
+        return ingreadientsRaw;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, prices);
+        return Objects.hash(name, price);
     }
 
     @Override
     public boolean equals(Object obj) {
         return (obj instanceof MealImplementation) &&
                 (name.equals(((MealImplementation) obj).name)) &&
-                (Arrays.equals(prices, ((MealImplementation) obj).prices));
+                (price == ((MealImplementation) obj).price);
     }
 
     @Override
     public String toString() {
         DecimalFormat d = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.GERMANY));
-        return name + " (S:" + d.format(prices[Role.STUDENT.ordinal()] / 100.0) + "\u20ac, B:"
-                + d.format(prices[Role.EMPLOYEE.ordinal()] / 100.0) + "\u20ac, G:"
-                + d.format(prices[Role.GUEST.ordinal()] / 100.0) + "\u20ac)";
+        return name + " (" + d.format(price / 100.0) + "\u20ac)" + "(" + ingreadientsRaw + ")";
     }
 }
