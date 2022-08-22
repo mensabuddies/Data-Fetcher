@@ -2,8 +2,10 @@ package retrieval;
 
 import dataclasses.interfaces.Meal;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import retrieval.interfaces.Parser;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class MealParser implements Parser<Meal> {
@@ -18,7 +20,7 @@ public class MealParser implements Parser<Meal> {
     @Override
     public Optional<Meal> parse(Element fetched) {
         String title = "";
-        int priceStudent, priceGuest, priceEmployee = -1;
+        int price = -1;
 
         if (!fetched.hasClass("menu")){
             throw new IllegalStateException("Wrong element class for MealParser!");
@@ -34,13 +36,22 @@ public class MealParser implements Parser<Meal> {
 
         try {
             assert priceElement != null;
-            priceStudent = Integer.parseInt(priceElement.attr("data-default").replace(",", ""));
-            priceGuest = Integer.parseInt(priceElement.attr("data-guest").replace(",", ""));
-            priceEmployee = Integer.parseInt(priceElement.attr("data-bed").replace(",", ""));
+            price = Integer.parseInt(priceElement.attr("data-default").replace(",", ""));
         } catch (Exception e){
             throw new IllegalStateException("Could not parse html!");
         }
 
-        return Optional.of(Meal.createMeal(title, priceStudent, priceGuest, priceEmployee));
+        Elements ingredientElements = Objects.requireNonNull(fetched.getElementsByClass("additnr").first())
+                .getElementsByTag("li");
+
+        StringBuilder sb = new StringBuilder();
+
+        for (Element ingredient:
+                ingredientElements) {
+            sb.append(ingredient.text()).append(";");
+        }
+        String ingredients = sb.substring(0, sb.length()-1);
+
+        return Optional.of(Meal.createMeal(title, price, ingredients));
     }
 }
