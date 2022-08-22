@@ -1,5 +1,7 @@
 package dataclasses;
 
+import dataclasses.enums.Location;
+
 import java.net.URL;
 import java.util.List;
 

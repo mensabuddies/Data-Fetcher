@@ -1,5 +1,7 @@
 package dataclasses;
 
+import dataclasses.enums.Weekday;
+
 public class OpeningHours {
     private Weekday weekday;
     private boolean open;

@@ -18,7 +18,7 @@ public class MealParser implements Parser<Meal> {
     @Override
     public Optional<Meal> parse(Element fetched) {
         String title = "";
-        int price = -1;
+        int priceStudent, priceGuest, priceEmployee = -1;
 
         if (!fetched.hasClass("menu")){
             throw new IllegalStateException("Wrong element class for MealParser!");
@@ -34,11 +34,13 @@ public class MealParser implements Parser<Meal> {
 
         try {
             assert priceElement != null;
-            price = Integer.parseInt(priceElement.attr("data-default").replace(",", ""));
+            priceStudent = Integer.parseInt(priceElement.attr("data-default").replace(",", ""));
+            priceGuest = Integer.parseInt(priceElement.attr("data-guest").replace(",", ""));
+            priceEmployee = Integer.parseInt(priceElement.attr("data-bed").replace(",", ""));
         } catch (Exception e){
             throw new IllegalStateException("Could not parse html!");
         }
 
-        return Optional.of(Meal.createMeal(title, price));
+        return Optional.of(Meal.createMeal(title, priceStudent, priceGuest, priceEmployee));
     }
 }

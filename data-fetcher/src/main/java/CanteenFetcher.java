@@ -1,7 +1,7 @@
 import dataclasses.Canteen;
-import dataclasses.Location;
+import dataclasses.enums.Location;
 import dataclasses.OpeningHours;
-import dataclasses.Weekday;
+import dataclasses.enums.Weekday;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
