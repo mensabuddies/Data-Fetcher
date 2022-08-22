@@ -12,8 +12,6 @@ import java.util.Set;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        //Canteens c = new Canteens();
-
         Fetcher fetcher = Fetcher.createJSOUPFetcher("https://www.studentenwerk-wuerzburg.de/essen-trinken/speiseplaene/mensateria-campus-hubland-nord-wuerzburg.html");
         Parser<Meal> mealParser = Parser.createMealParser();
 
