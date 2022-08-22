@@ -7,7 +7,7 @@ public interface Meal {
 
     int getPrice(); // in cents
 
-    static Meal createMeal(String name, int price) {
+    static MealImplementation createMeal(String name, int price) {
         if (name == null || name.equals("")) {
             throw new IllegalArgumentException("Name cannot be empty!");
         }
