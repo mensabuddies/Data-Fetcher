@@ -1,4 +1,4 @@
-package dataclasses;
+package dataclasses.enums;
 
 public enum Location {
     Würzburg,
