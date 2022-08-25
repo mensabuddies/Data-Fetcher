@@ -1,6 +1,8 @@
 # Mensa API - Studentenwerk Würzburg
 > *This is no official API of the Studentenwerk Würzburg!*
 
+> Currently still under development!
+
 Makes the meals of the canteens of the Studentenwerk Würzburg accessible via an API.
 
 ## ER-Diagram
