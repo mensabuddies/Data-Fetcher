@@ -16,6 +16,7 @@ public class Location {
     @Column(name = "location_id")
     private Integer id;
 
+    @Column(unique = true)
     private String location;
 
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)

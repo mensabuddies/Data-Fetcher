@@ -4,6 +4,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.sql.Date;
+import java.sql.Time;
+import java.util.Set;
 
 @Data
 @Entity
@@ -21,12 +24,29 @@ public class Meal {
     // Prices in cent
     @Column(name = "price_student")
     private int priceStudent;
+
     @Column(name = "price_employee")
     private int priceEmployee;
+
     @Column(name = "price_guest")
     private int priceGuest;
 
-    public String getName() {
-        return name;
-    }
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "meal_allergens_relationship",
+            joinColumns = @JoinColumn(name = "meal_id"),
+            inverseJoinColumns = @JoinColumn(name = "allergen_id")
+    )
+    private Set<Allergen> allergens;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "meal_ingredients_relationship",
+            joinColumns = @JoinColumn(name = "meal_id"),
+            inverseJoinColumns = @JoinColumn(name = "ingredient_id")
+    )
+    private Set<Ingredients> ingredients;
+
+    @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL)
+    private Set<Menu> menus;
 }

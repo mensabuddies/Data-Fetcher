@@ -16,6 +16,7 @@ public class Weekday {
     @Column(name = "weekday_id")
     private int id;
 
+    @Column(unique = true)
     private String weekday;
 
     @OneToMany(mappedBy = "weekday", cascade = CascadeType.ALL)

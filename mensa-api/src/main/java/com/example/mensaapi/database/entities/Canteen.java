@@ -14,7 +14,7 @@ import java.util.Set;
 public class Canteen {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "canteen_id")
+    @Column(name = "canteen_id", unique = true)
     private Integer id;
 
     @ManyToOne(optional = false)
@@ -25,9 +25,13 @@ public class Canteen {
     private Set<OpeningHours> openingHours;
 
     private String info;
+
     @Column(name = "additional_info")
     private String additionalInfo;
+
     @Column(name = "link_to_food_plan")
     private URL linkToFoodPlan;
 
+    @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
+    private Set<Menu> menus;
 }
