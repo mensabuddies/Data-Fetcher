@@ -17,8 +17,12 @@ public class Location {
     private Integer id;
 
     @Column(unique = true)
-    private String location;
+    private String name;
 
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)
     private Set<Canteen> canteens;
+
+    public Location(String name){
+        this.name = name;
+    }
 }

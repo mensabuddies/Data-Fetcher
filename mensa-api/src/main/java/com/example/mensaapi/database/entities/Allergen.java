@@ -17,7 +17,7 @@ public class Allergen {
     private Integer id;
 
     @Column(unique = true)
-    private String allergen;
+    private String name;
 
     @ManyToMany(mappedBy = "allergens")
     private Set<Meal> meals;

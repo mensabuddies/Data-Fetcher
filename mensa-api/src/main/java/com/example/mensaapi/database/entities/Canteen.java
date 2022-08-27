@@ -17,6 +17,9 @@ public class Canteen {
     @Column(name = "canteen_id", unique = true)
     private Integer id;
 
+    @Column(unique = true)
+    private String name;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "location_id", nullable = false)
     private Location location;
