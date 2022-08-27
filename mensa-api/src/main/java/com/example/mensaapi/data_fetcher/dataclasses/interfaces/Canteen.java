@@ -2,7 +2,6 @@ package com.example.mensaapi.data_fetcher.dataclasses.interfaces;
 
 import com.example.mensaapi.data_fetcher.dataclasses.CanteenImplementation;
 import com.example.mensaapi.data_fetcher.dataclasses.Day;
-import com.example.mensaapi.data_fetcher.dataclasses.OpeningHoursImplementation;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
 
 import java.time.LocalDate;

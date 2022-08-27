@@ -1,15 +1,14 @@
 package com.example.mensaapi.data_fetcher.retrieval;
 
-import com.example.mensaapi.data_fetcher.dataclasses.CanteenImplementation;
 import com.example.mensaapi.data_fetcher.dataclasses.Day;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.Canteen;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.OpeningHours;
+import com.example.mensaapi.data_fetcher.retrieval.interfaces.Fetcher;
+import com.example.mensaapi.data_fetcher.retrieval.interfaces.Parser;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import com.example.mensaapi.data_fetcher.retrieval.interfaces.Fetcher;
-import com.example.mensaapi.data_fetcher.retrieval.interfaces.Parser;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;

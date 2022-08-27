@@ -1,8 +1,8 @@
 package com.example.mensaapi.data_fetcher.retrieval;
 
+import com.example.mensaapi.data_fetcher.retrieval.interfaces.Fetcher;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import com.example.mensaapi.data_fetcher.retrieval.interfaces.Fetcher;
 
 import java.io.IOException;
 import java.net.URI;
