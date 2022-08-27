@@ -1,15 +1,15 @@
 package com.example.mensaapi.database.entities;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalTime;
 
-@Data
 @Entity
 @Table(name = "opening_hours")
 @NoArgsConstructor
+@Getter
+@Setter
 public class OpeningHours {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

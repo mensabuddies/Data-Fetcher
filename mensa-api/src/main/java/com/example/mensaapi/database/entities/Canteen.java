@@ -1,16 +1,16 @@
 package com.example.mensaapi.database.entities;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.net.URL;
 import java.util.Set;
 
-@Data
 @Entity
 @Table(name = "canteens")
 @NoArgsConstructor
+@Getter
+@Setter
 public class Canteen {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

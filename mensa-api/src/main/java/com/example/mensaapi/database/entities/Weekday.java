@@ -1,15 +1,15 @@
 package com.example.mensaapi.database.entities;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Set;
 
-@Data
 @Entity
 @Table(name = "weekdays")
 @NoArgsConstructor
+@Getter
+@Setter
 public class Weekday {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,6 +19,11 @@ public class Weekday {
     @Column(unique = true)
     private String weekday;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "weekday", cascade = CascadeType.ALL)
-    private Set<OpeningHours> openingHours;
+    private Set<OpeningHours> openingHours = new java.util.LinkedHashSet<>();
+
+    public Weekday(String weekday){
+        this.weekday = weekday;
+    }
 }

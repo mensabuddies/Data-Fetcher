@@ -1,15 +1,15 @@
 package com.example.mensaapi.database.entities;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Set;
 
-@Data
 @Entity
 @Table(name = "meals")
 @NoArgsConstructor
+@Getter
+@Setter
 public class Meal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
