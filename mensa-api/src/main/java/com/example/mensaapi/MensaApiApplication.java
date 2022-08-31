@@ -2,6 +2,7 @@ package com.example.mensaapi;
 
 import com.example.mensaapi.data_fetcher.DataFetcher;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedCanteen;
+import com.example.mensaapi.database.Util;
 import com.example.mensaapi.database.entities.Location;
 import com.example.mensaapi.database.entities.Weekday;
 import com.example.mensaapi.database.repositories.CanteenRepository;
@@ -22,16 +23,14 @@ public class MensaApiApplication {
 	}
 
 	@Bean
-	public CommandLineRunner run(WeekdayRepository weekdayRepository, LocationRepository locationRepository){
+	public CommandLineRunner run(WeekdayRepository weekdayRepository, LocationRepository locationRepository, CanteenRepository canteenRepository){
 		return (args -> {
-			insertWeekdays(weekdayRepository);
-			insertLocations(locationRepository);
-		});
-	}
+			Util u = new Util();
+			u.insertWeekdays(weekdayRepository);
+			u.insertLocations(locationRepository);
 
-	@Bean
-	public CommandLineRunner run(CanteenRepository canteenRepository){
-		return (args -> storeStudentenwerkDataInDatabase(canteenRepository));
+			storeStudentenwerkDataInDatabase(canteenRepository);
+		});
 	}
 
 
@@ -41,19 +40,6 @@ public class MensaApiApplication {
 			com.example.mensaapi.database.entities.Canteen canteen = new com.example.mensaapi.database.entities.Canteen();
 			canteen.setName(fetchedCanteen.getName());
 
-		}
-	}
-
-	private void insertLocations(LocationRepository repository){
-		String[] locations = {"Würzburg", "Schweinfurt", "Bamberg", "Aschaffenburg"};
-		for(String location : locations){
-			repository.save(new Location(location));
-		}
-	}
-	private void insertWeekdays(WeekdayRepository repository){
-		String[] weekdays = {"Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"};
-		for(String day : weekdays){
-			repository.save(new Weekday(day));
 		}
 	}
 }
