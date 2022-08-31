@@ -1,9 +1,9 @@
 package com.example.mensaapi.data_fetcher.retrieval;
 
-import com.example.mensaapi.data_fetcher.dataclasses.Day;
+import com.example.mensaapi.data_fetcher.dataclasses.FetchedDay;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
-import com.example.mensaapi.data_fetcher.dataclasses.interfaces.Canteen;
-import com.example.mensaapi.data_fetcher.dataclasses.interfaces.OpeningHours;
+import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedCanteen;
+import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedOpeningHours;
 import com.example.mensaapi.data_fetcher.retrieval.interfaces.Fetcher;
 import com.example.mensaapi.data_fetcher.retrieval.interfaces.Parser;
 import org.jsoup.nodes.Document;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class CanteenParser implements Parser<Canteen> {
+public class CanteenParser implements Parser<FetchedCanteen> {
     /**
      * Expects an Element of class "mensa"
      *
@@ -24,14 +24,14 @@ public class CanteenParser implements Parser<Canteen> {
      * @return
      */
     @Override
-    public Optional<Canteen> parse(Element fetched) {
+    public Optional<FetchedCanteen> parse(Element fetched) {
         Elements details = fetched.getElementsByClass("right");
         String name = "";
         String headerInfo = "";
         Location location = Location.WÜRZBURG;
         String linkToFood = "";
         String additional = "";
-        List<OpeningHours> op = new ArrayList<>();
+        List<FetchedOpeningHours> op = new ArrayList<>();
 
 
         for (Element detail : details) {
@@ -67,8 +67,8 @@ public class CanteenParser implements Parser<Canteen> {
 
         Optional<Document> menuOfCanteen = Fetcher.createJSOUPFetcher(linkToFood).fetchCurrentData();
 
-        List<Day> menus = new ArrayList<>();
-        Parser<Day> dayParser = Parser.createDayParser();
+        List<FetchedDay> menus = new ArrayList<>();
+        Parser<FetchedDay> dayParser = Parser.createDayParser();
 
         menuOfCanteen.ifPresent(document -> {
             Elements days = document.getElementsByClass("day").stream().filter(dayElement -> dayElement.tagName().equals("div")).collect(Collectors.toCollection(Elements::new));
@@ -77,7 +77,7 @@ public class CanteenParser implements Parser<Canteen> {
             }
         });
 
-        return Optional.of(Canteen.createCanteen(
+        return Optional.of(FetchedCanteen.createCanteen(
                 name,
                 location,
                 headerInfo,
@@ -110,8 +110,8 @@ public class CanteenParser implements Parser<Canteen> {
         return 0;
     }
 
-    private List<OpeningHours> constructOpeningHours(Elements contentTableRows) {
-        List<OpeningHours> openingHoursList = new ArrayList<>();
+    private List<FetchedOpeningHours> constructOpeningHours(Elements contentTableRows) {
+        List<FetchedOpeningHours> fetchedOpeningHoursList = new ArrayList<>();
         int weekdayCounter = 0;
         for (Element tableRow : contentTableRows) {
             Elements tableRowItems = tableRow.children();
@@ -142,7 +142,7 @@ public class CanteenParser implements Parser<Canteen> {
                     }
                     getAMealTill = mealOutTill;
 
-                    OpeningHours h = OpeningHours.createOpeningHours(
+                    FetchedOpeningHours h = FetchedOpeningHours.createOpeningHours(
                             day,
                             open,
                             openingAt,
@@ -151,11 +151,11 @@ public class CanteenParser implements Parser<Canteen> {
                     );
 
                     weekdayCounter++;
-                    openingHoursList.add(h);
+                    fetchedOpeningHoursList.add(h);
                 }
             }
         }
-        return openingHoursList;
+        return fetchedOpeningHoursList;
     }
 }
 

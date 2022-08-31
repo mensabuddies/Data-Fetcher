@@ -1,6 +1,6 @@
 package com.example.mensaapi.data_fetcher.retrieval;
 
-import com.example.mensaapi.data_fetcher.dataclasses.interfaces.Meal;
+import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedMeal;
 import com.example.mensaapi.data_fetcher.retrieval.interfaces.Parser;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -8,17 +8,17 @@ import org.jsoup.select.Elements;
 import java.util.Objects;
 import java.util.Optional;
 
-public class MealParser implements Parser<Meal> {
+public class MealParser implements Parser<FetchedMeal> {
 
 
     /**
      * Returns parsed meal object from fetched element
      *
      * @param fetched expects element of class "menu"
-     * @return returns {@link Optional<Meal>}
+     * @return returns {@link Optional< FetchedMeal >}
      */
     @Override
-    public Optional<Meal> parse(Element fetched) {
+    public Optional<FetchedMeal> parse(Element fetched) {
         String title = "";
         int price = -1;
 
@@ -52,6 +52,6 @@ public class MealParser implements Parser<Meal> {
         }
         String ingredients = sb.substring(0, sb.length()-1);
 
-        return Optional.of(Meal.createMeal(title, price, ingredients));
+        return Optional.of(FetchedMeal.createMeal(title, price, ingredients));
     }
 }
