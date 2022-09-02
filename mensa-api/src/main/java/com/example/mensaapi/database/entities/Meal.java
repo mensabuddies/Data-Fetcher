@@ -31,21 +31,11 @@ public class Meal {
     @Column(name = "price_guest")
     private int priceGuest;
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "meal_allergens_relationship",
-            joinColumns = @JoinColumn(name = "meal_id"),
-            inverseJoinColumns = @JoinColumn(name = "allergen_id")
-    )
-    private Set<Allergen> allergens;
+    @Column
+    private String allergens;
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "meal_ingredients_relationship",
-            joinColumns = @JoinColumn(name = "meal_id"),
-            inverseJoinColumns = @JoinColumn(name = "ingredient_id")
-    )
-    private Set<Ingredients> ingredients;
+    @Column
+    private String ingredients;
 
     @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL)
     private Set<Menu> menus;
