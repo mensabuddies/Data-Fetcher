@@ -20,13 +20,13 @@ public class Weekday {
     private int id;
 
     @Column(unique = true)
-    private String weekday;
+    private String name;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "weekday", cascade = CascadeType.ALL)
     private Set<OpeningHours> openingHours = new java.util.LinkedHashSet<>();
 
-    public Weekday(String weekday){
-        this.weekday = weekday;
+    public Weekday(String name){
+        this.name = name;
     }
 }
