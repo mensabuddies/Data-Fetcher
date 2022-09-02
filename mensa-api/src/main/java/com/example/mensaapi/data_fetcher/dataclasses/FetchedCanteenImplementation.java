@@ -1,40 +1,40 @@
 package com.example.mensaapi.data_fetcher.dataclasses;
 
 import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
-import com.example.mensaapi.data_fetcher.dataclasses.interfaces.Canteen;
-import com.example.mensaapi.data_fetcher.dataclasses.interfaces.OpeningHours;
+import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedCanteen;
+import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedOpeningHours;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public class CanteenImplementation implements Canteen {
+public class FetchedCanteenImplementation implements FetchedCanteen {
     private final String name;
     private final Location location;
     private final String info;
-    private final List<OpeningHours> openingHours;
+    private final List<FetchedOpeningHours> fetchedOpeningHours;
     private final String additional;
 
     private final String linkToFoodPlan;
 
-    private final List<Day> menusPerDay;
+    private final List<FetchedDay> menusPerFetchedDay;
 
-    public CanteenImplementation(
+    public FetchedCanteenImplementation(
             String name,
             Location location,
             String info,
-            List<OpeningHours> openingHours,
+            List<FetchedOpeningHours> fetchedOpeningHours,
             String additional,
             String linkToFoodPlan,
-            List<Day> menusPerDay
+            List<FetchedDay> menusPerFetchedDay
     ) {
         this.name = name;
         this.location = location;
         this.info = info;
-        this.openingHours = openingHours;
+        this.fetchedOpeningHours = fetchedOpeningHours;
         this.additional = additional;
         this.linkToFoodPlan = linkToFoodPlan;
-        this.menusPerDay = menusPerDay;
+        this.menusPerFetchedDay = menusPerFetchedDay;
     }
 
     @Override
@@ -53,8 +53,8 @@ public class CanteenImplementation implements Canteen {
     }
 
     @Override
-    public List<OpeningHours> getOpeningHours() {
-        return openingHours;
+    public List<FetchedOpeningHours> getOpeningHours() {
+        return fetchedOpeningHours;
     }
 
     @Override
@@ -68,13 +68,13 @@ public class CanteenImplementation implements Canteen {
     }
 
     @Override
-    public List<Day> getMenus() {
-        return menusPerDay;
+    public List<FetchedDay> getMenus() {
+        return menusPerFetchedDay;
     }
 
     @Override
-    public Optional<Day> getMenuOfDay(LocalDate date) {
-        return menusPerDay.stream().filter(menu -> menu.getDate().equals(date)).findFirst();
+    public Optional<FetchedDay> getMenuOfDay(LocalDate date) {
+        return menusPerFetchedDay.stream().filter(menu -> menu.getDate().equals(date)).findFirst();
     }
 
     @Override
@@ -83,10 +83,10 @@ public class CanteenImplementation implements Canteen {
                 "name='" + name + '\'' +
                 ", location=" + location +
                 ", info='" + info + '\'' +
-                ", openingHours=" + openingHours +
+                ", openingHours=" + fetchedOpeningHours +
                 ", additional='" + additional + '\'' +
                 ", linkToFoodPlan=" + linkToFoodPlan +
-                ", meals=" + menusPerDay +
+                ", meals=" + menusPerFetchedDay +
                 "}\n";
     }
 }

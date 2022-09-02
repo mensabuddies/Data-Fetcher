@@ -1,9 +1,9 @@
 package com.example.mensaapi.data_fetcher.retrieval.interfaces;
 
-import org.jsoup.nodes.Element;
 import com.example.mensaapi.data_fetcher.retrieval.CanteenParser;
 import com.example.mensaapi.data_fetcher.retrieval.DayParser;
 import com.example.mensaapi.data_fetcher.retrieval.MealParser;
+import org.jsoup.nodes.Element;
 
 import java.util.Optional;
 

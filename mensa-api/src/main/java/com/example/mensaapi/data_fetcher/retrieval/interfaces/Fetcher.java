@@ -1,7 +1,7 @@
 package com.example.mensaapi.data_fetcher.retrieval.interfaces;
 
-import org.jsoup.nodes.Document;
 import com.example.mensaapi.data_fetcher.retrieval.JsoupFetcher;
+import org.jsoup.nodes.Document;
 
 import java.util.Optional;
 

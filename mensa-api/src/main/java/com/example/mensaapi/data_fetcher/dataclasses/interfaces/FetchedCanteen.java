@@ -1,43 +1,42 @@
 package com.example.mensaapi.data_fetcher.dataclasses.interfaces;
 
-import com.example.mensaapi.data_fetcher.dataclasses.CanteenImplementation;
-import com.example.mensaapi.data_fetcher.dataclasses.Day;
-import com.example.mensaapi.data_fetcher.dataclasses.OpeningHoursImplementation;
+import com.example.mensaapi.data_fetcher.dataclasses.FetchedCanteenImplementation;
+import com.example.mensaapi.data_fetcher.dataclasses.FetchedDay;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface Canteen {
+public interface FetchedCanteen {
     String getName();
     Location getLocation();
     String getTitleInfo();
-    List<OpeningHours> getOpeningHours();
+    List<FetchedOpeningHours> getOpeningHours();
     String getBodyInfo();
     String getLinkToFoodPlan();
 
-    List<Day> getMenus();
+    List<FetchedDay> getMenus();
 
-    Optional<Day> getMenuOfDay(LocalDate date);
+    Optional<FetchedDay> getMenuOfDay(LocalDate date);
 
-    static CanteenImplementation createCanteen(
+    static FetchedCanteenImplementation createCanteen(
             String name,
             Location location,
             String info,
-            List<OpeningHours> openingHours,
+            List<FetchedOpeningHours> fetchedOpeningHours,
             String additional,
             String linkToFoodPlan,
-            List<Day> menusPerDay
+            List<FetchedDay> menusPerFetchedDay
     ) {
-        return new CanteenImplementation(
+        return new FetchedCanteenImplementation(
                 name,
                 location,
                 info,
-                openingHours,
+                fetchedOpeningHours,
                 additional,
                 linkToFoodPlan,
-                menusPerDay
+                menusPerFetchedDay
         );
     }
 }

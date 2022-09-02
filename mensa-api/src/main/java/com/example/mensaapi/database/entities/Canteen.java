@@ -1,21 +1,26 @@
 package com.example.mensaapi.database.entities;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.net.URL;
 import java.util.Set;
 
-@Data
 @Entity
 @Table(name = "canteens")
 @NoArgsConstructor
+@Getter
+@Setter
 public class Canteen {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "canteen_id", unique = true)
     private Integer id;
+
+    @Column(unique = true)
+    private String name;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "location_id", nullable = false)
@@ -30,7 +35,7 @@ public class Canteen {
     private String additionalInfo;
 
     @Column(name = "link_to_food_plan")
-    private URL linkToFoodPlan;
+    private String linkToFoodPlan;
 
     @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
     private Set<Menu> menus;

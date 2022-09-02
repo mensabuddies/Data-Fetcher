@@ -1,10 +1,10 @@
 package com.example.mensaapi.data_fetcher.retrieval;
 
-import com.example.mensaapi.data_fetcher.dataclasses.Day;
-import com.example.mensaapi.data_fetcher.dataclasses.interfaces.Meal;
+import com.example.mensaapi.data_fetcher.dataclasses.FetchedDay;
+import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedMeal;
+import com.example.mensaapi.data_fetcher.retrieval.interfaces.Parser;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import com.example.mensaapi.data_fetcher.retrieval.interfaces.Parser;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class DayParser implements Parser<Day> {
+public class DayParser implements Parser<FetchedDay> {
     private final MealParser mealParser;
 
     public DayParser(MealParser mealParser) {
@@ -26,11 +26,11 @@ public class DayParser implements Parser<Day> {
      * @return
      */
     @Override
-    public Optional<Day> parse(Element fetched) {
+    public Optional<FetchedDay> parse(Element fetched) {
         String rawDate;
         LocalDate parsedDate = null;
         Elements menus;
-        Set<Meal> mealSet = new HashSet<>();
+        Set<FetchedMeal> fetchedMealSet = new HashSet<>();
 
         if (fetched.hasAttr("data-day")) {
             rawDate = fetched.attr("data-day");
@@ -53,7 +53,7 @@ public class DayParser implements Parser<Day> {
 
             for (Element menu: menus) {
 
-                mealSet.add(mealParser.parse(menu).orElseThrow());
+                fetchedMealSet.add(mealParser.parse(menu).orElseThrow());
             }
         }
 
@@ -61,6 +61,6 @@ public class DayParser implements Parser<Day> {
             throw new IllegalStateException("Parsing failed!");
         }
 
-        return Optional.of(new Day(parsedDate, mealSet));
+        return Optional.of(new FetchedDay(parsedDate, fetchedMealSet));
     }
 }

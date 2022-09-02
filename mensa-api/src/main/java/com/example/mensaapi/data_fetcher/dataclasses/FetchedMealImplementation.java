@@ -1,19 +1,19 @@
 package com.example.mensaapi.data_fetcher.dataclasses;
 
-import com.example.mensaapi.data_fetcher.dataclasses.interfaces.Meal;
+import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedMeal;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Objects;
 
-public class MealImplementation implements Meal {
+public class FetchedMealImplementation implements FetchedMeal {
     private final String name;
     private final int price;
 
     private final String ingreadientsRaw;
 
-    public MealImplementation(String name, int price, String ingreadientsRaw) {
+    public FetchedMealImplementation(String name, int price, String ingreadientsRaw) {
         this.name = name;
         this.price = price;
         this.ingreadientsRaw = ingreadientsRaw;
@@ -42,9 +42,9 @@ public class MealImplementation implements Meal {
 
     @Override
     public boolean equals(Object obj) {
-        return (obj instanceof MealImplementation) &&
-                (name.equals(((MealImplementation) obj).name)) &&
-                (price == ((MealImplementation) obj).price);
+        return (obj instanceof FetchedMealImplementation) &&
+                (name.equals(((FetchedMealImplementation) obj).name)) &&
+                (price == ((FetchedMealImplementation) obj).price);
     }
 
     @Override

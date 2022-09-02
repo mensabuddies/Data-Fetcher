@@ -1,15 +1,17 @@
 package com.example.mensaapi.database.entities;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Set;
 
-@Data
 @Entity
 @Table(name = "locations")
 @NoArgsConstructor
+@Getter
+@Setter
 public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,8 +19,12 @@ public class Location {
     private Integer id;
 
     @Column(unique = true)
-    private String location;
+    private String name;
 
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)
     private Set<Canteen> canteens;
+
+    public Location(String name){
+        this.name = name;
+    }
 }

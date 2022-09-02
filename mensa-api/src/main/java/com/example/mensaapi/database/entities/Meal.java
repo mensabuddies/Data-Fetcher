@@ -1,17 +1,17 @@
 package com.example.mensaapi.database.entities;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
-import java.sql.Date;
-import java.sql.Time;
 import java.util.Set;
 
-@Data
 @Entity
 @Table(name = "meals")
 @NoArgsConstructor
+@Getter
+@Setter
 public class Meal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,22 +31,21 @@ public class Meal {
     @Column(name = "price_guest")
     private int priceGuest;
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "meal_allergens_relationship",
-            joinColumns = @JoinColumn(name = "meal_id"),
-            inverseJoinColumns = @JoinColumn(name = "allergen_id")
-    )
-    private Set<Allergen> allergens;
+    @Column
+    private String allergens;
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "meal_ingredients_relationship",
-            joinColumns = @JoinColumn(name = "meal_id"),
-            inverseJoinColumns = @JoinColumn(name = "ingredient_id")
-    )
-    private Set<Ingredients> ingredients;
+    @Column
+    private String ingredients;
 
     @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL)
     private Set<Menu> menus;
+
+    public Meal(String name, int priceStudent, int priceEmployee, int priceGuest, String allergens, String ingredients) {
+        this.name = name;
+        this.priceStudent = priceStudent;
+        this.priceEmployee = priceEmployee;
+        this.priceGuest = priceGuest;
+        this.allergens = allergens;
+        this.ingredients = ingredients;
+    }
 }
