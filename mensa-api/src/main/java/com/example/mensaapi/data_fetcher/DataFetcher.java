@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public class DataFetcher {
     private List<FetchedCanteen> fetchedCanteens = new ArrayList<>();
-    public void fetchData() {
+    public DataFetcher() {
         Fetcher fetcher = Fetcher.createJSOUPFetcher("https://www.studentenwerk-wuerzburg.de/wuerzburg/essen-trinken/speiseplaene.html");
         Optional<Document> doc = fetcher.fetchCurrentData();
 
