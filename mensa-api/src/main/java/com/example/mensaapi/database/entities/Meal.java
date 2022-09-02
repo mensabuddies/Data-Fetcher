@@ -39,4 +39,13 @@ public class Meal {
 
     @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL)
     private Set<Menu> menus;
+
+    public Meal(String name, int priceStudent, int priceEmployee, int priceGuest, String allergens, String ingredients) {
+        this.name = name;
+        this.priceStudent = priceStudent;
+        this.priceEmployee = priceEmployee;
+        this.priceGuest = priceGuest;
+        this.allergens = allergens;
+        this.ingredients = ingredients;
+    }
 }
