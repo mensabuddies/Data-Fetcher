@@ -35,7 +35,7 @@ public class Canteen {
     private String additionalInfo;
 
     @Column(name = "link_to_food_plan")
-    private URL linkToFoodPlan;
+    private String linkToFoodPlan;
 
     @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
     private Set<Menu> menus;
