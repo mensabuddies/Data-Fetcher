@@ -9,14 +9,19 @@ import java.util.Objects;
 
 public class FetchedMealImplementation implements FetchedMeal {
     private final String name;
-    private final int price;
+    private final int priceStudent;
+    private final int priceEmployee;
+    private final int priceGuest;
+    private final String allergensRaw;
+    private final String ingredientsRaw;
 
-    private final String ingreadientsRaw;
-
-    public FetchedMealImplementation(String name, int price, String ingreadientsRaw) {
+    public FetchedMealImplementation(String name, int priceStudent, int priceEmployee, int priceGuest, String allergensRaw, String ingredientsRaw) {
         this.name = name;
-        this.price = price;
-        this.ingreadientsRaw = ingreadientsRaw;
+        this.priceStudent = priceStudent;
+        this.priceEmployee = priceEmployee;
+        this.priceGuest = priceEmployee;
+        this.allergensRaw = allergensRaw;
+        this.ingredientsRaw = ingredientsRaw;
     }
 
     @Override
@@ -26,30 +31,52 @@ public class FetchedMealImplementation implements FetchedMeal {
     }
 
     @Override
-    public int getPrice() {
-        return price;
+    public int getPriceStudent() {
+        return priceStudent;
     }
 
     @Override
-    public String getIngreadientsRaw() {
-        return ingreadientsRaw;
+    public int getPriceEmployee() {
+        return priceEmployee;
+    }
+
+    @Override
+    public int getPriceGuest() {
+        return priceGuest;
+    }
+
+    @Override
+    public String getAllergensRaw() {
+        return allergensRaw;
+    }
+
+    @Override
+    public String getIngredientsRaw() {
+        return ingredientsRaw;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FetchedMealImplementation that = (FetchedMealImplementation) o;
+        return priceStudent == that.priceStudent && priceEmployee == that.priceEmployee && priceGuest == that.priceGuest && name.equals(that.name) && Objects.equals(allergensRaw, that.allergensRaw) && Objects.equals(ingredientsRaw, that.ingredientsRaw);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, price);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return (obj instanceof FetchedMealImplementation) &&
-                (name.equals(((FetchedMealImplementation) obj).name)) &&
-                (price == ((FetchedMealImplementation) obj).price);
+        return Objects.hash(name, priceStudent, priceEmployee, priceGuest, allergensRaw, ingredientsRaw);
     }
 
     @Override
     public String toString() {
-        DecimalFormat d = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.GERMANY));
-        return name + " (" + d.format(price / 100.0) + "\u20ac)" + "(" + ingreadientsRaw + ")";
+        return "FetchedMealImplementation{" +
+                "name='" + name + '\'' +
+                ", priceStudent=" + priceStudent +
+                ", priceEmployee=" + priceEmployee +
+                ", priceGuest=" + priceGuest +
+                ", allergensRaw='" + allergensRaw + '\'' +
+                ", ingredientsRaw='" + ingredientsRaw + '\'' +
+                '}';
     }
 }

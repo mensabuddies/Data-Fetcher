@@ -20,7 +20,9 @@ public class MealParser implements Parser<FetchedMeal> {
     @Override
     public Optional<FetchedMeal> parse(Element fetched) {
         String title = "";
-        int price = -1;
+        int priceStudent = -1;
+        int priceEmployee = -1;
+        int priceGuest = -1;
 
         if (!fetched.hasClass("menu")){
             throw new IllegalStateException("Wrong element class for MealParser!");
@@ -36,22 +38,39 @@ public class MealParser implements Parser<FetchedMeal> {
 
         try {
             assert priceElement != null;
-            price = Integer.parseInt(priceElement.attr("data-default").replace(",", ""));
+            priceStudent = Integer.parseInt(priceElement.attr("data-default").replace(",", ""));
+            priceEmployee = Integer.parseInt(priceElement.attr("data-bed").replace(",", ""));
+            priceGuest = Integer.parseInt(priceElement.attr("data-guest").replace(",", ""));
         } catch (Exception e){
             throw new IllegalStateException("Could not parse html!");
         }
 
-        Elements ingredientElements = Objects.requireNonNull(fetched.getElementsByClass("additnr").first())
+        Elements allergensElements = Objects
+                .requireNonNull(fetched.getElementsByClass("additnr").first())
                 .getElementsByTag("li");
 
+        Elements ingredientsElements = Objects
+                .requireNonNull(fetched.getElementsByClass("icon").first())
+                .getElementsByClass("theicon");
+
+        String allergens = getString(allergensElements, true);
+
+        String ingredients = getString(ingredientsElements, false);
+
+        return Optional.of(FetchedMeal.createMeal(title, priceStudent, priceEmployee, priceGuest, allergens, ingredients));
+    }
+
+    private String getString(Elements elements, boolean isAllergen){
         StringBuilder sb = new StringBuilder();
 
-        for (Element ingredient:
-                ingredientElements) {
-            sb.append(ingredient.text()).append(";");
+        for (Element e : elements) {
+            if(isAllergen){
+                sb.append(e.text()).append(",");
+            } else {
+                sb.append(e.attr("title")).append(",");
+            }
         }
-        String ingredients = sb.substring(0, sb.length()-1);
 
-        return Optional.of(FetchedMeal.createMeal(title, price, ingredients));
+        return sb.substring(0, sb.length()-1);
     }
 }

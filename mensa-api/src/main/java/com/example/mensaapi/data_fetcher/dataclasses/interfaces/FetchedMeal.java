@@ -5,17 +5,20 @@ import com.example.mensaapi.data_fetcher.dataclasses.FetchedMealImplementation;
 public interface FetchedMeal {
     String getName();
 
-    int getPrice(); // in cents
+    int getPriceStudent(); // in cents
+    int getPriceEmployee();
+    int getPriceGuest();
 
-    String getIngreadientsRaw();
+    String getAllergensRaw();
+    String getIngredientsRaw();
 
-    static FetchedMealImplementation createMeal(String name, int price, String ingredientsRaw) {
+    static FetchedMealImplementation createMeal(String name, int priceStudent, int priceEmployee, int priceGuest, String allergensRaw, String ingredientsRaw) {
         if (name == null || name.equals("")) {
             throw new IllegalArgumentException("Name cannot be empty!");
         }
-        if (price < 0) {
+        if (priceStudent < 0 || priceEmployee < 0 || priceGuest < 0) {
             throw new IllegalArgumentException("Price of Meal (\"" + name + "\") cannot be below 0!");
         }
-        return new FetchedMealImplementation(name, price, ingredientsRaw);
+        return new FetchedMealImplementation(name, priceStudent, priceEmployee, priceGuest, allergensRaw, ingredientsRaw);
     }
 }
