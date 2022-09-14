@@ -1,5 +1,6 @@
 package com.example.mensaapi.database.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +25,7 @@ public class Weekday {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "weekday", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Set<OpeningHours> openingHours = new java.util.LinkedHashSet<>();
 
     public Weekday(String name){

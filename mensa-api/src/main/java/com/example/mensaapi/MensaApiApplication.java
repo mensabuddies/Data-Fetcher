@@ -15,9 +15,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.DayOfWeek;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -79,7 +83,7 @@ public class MensaApiApplication {
 		// TODO: More efficient with findByName, but has to be implemented
 		BiFunction<Iterable<Canteen>, String,Integer> getId = (canteens, canteenName) -> {
 			for (Canteen c:
-				 canteens) {
+					canteens) {
 				if (c.getName().equals(canteenName)) return c.getId();
 			}
 			return -1;
@@ -127,4 +131,7 @@ public class MensaApiApplication {
 		};
 		return weekdayRepository.getWeekdayByName(weekdayName);
 	}
+
+
+
 }

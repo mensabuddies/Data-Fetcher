@@ -1,5 +1,6 @@
 package com.example.mensaapi.database.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,10 +21,12 @@ public class Menu {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "canteen_id", nullable = false)
+    @JsonBackReference
     private Canteen canteen;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "meal_id", nullable = false)
+    @JsonBackReference
     private Meal meal;
 
     private LocalDate date;
