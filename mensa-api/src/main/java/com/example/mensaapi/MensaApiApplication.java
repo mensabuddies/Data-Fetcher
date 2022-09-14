@@ -18,12 +18,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.DayOfWeek;
-import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 @SpringBootApplication
 public class MensaApiApplication {
@@ -47,12 +45,12 @@ public class MensaApiApplication {
 		});
 	}
 
-	@Scheduled(fixedDelay = 5000) // cron
+
 	private void saveLatestData() {
 		storeStudentenwerkDataInDatabase();
 	}
 
-
+	@Scheduled(cron = "0 0 0 * * *") // Täglich um 0 Uhr
 	private void storeStudentenwerkDataInDatabase(){
 		List<FetchedCanteen> fetchedCanteens = new DataFetcher().get();
 
@@ -96,7 +94,7 @@ public class MensaApiApplication {
 		canteen.setInfo(fetchedCanteen.getTitleInfo());
 		canteen.setAdditionalInfo(fetchedCanteen.getBodyInfo());
 		canteen.setLinkToFoodPlan(fetchedCanteen.getLinkToFoodPlan());
-		canteenRepository.save(canteen);
+		//canteenRepository.save(canteen);
 
 
 		Set<OpeningHours> openingHours = new HashSet<>();
@@ -104,7 +102,7 @@ public class MensaApiApplication {
 			openingHours.add(
 					new OpeningHours(
 							canteen,
-							dayOfWeekToWeekday(weekdayRepository, f.getWeekday()),
+							dayOfWeekToWeekday(f.getWeekday()),
 							f.isOpen(),
 							f.getOpeningAt(),
 							f.getClosingAt(),
@@ -117,7 +115,7 @@ public class MensaApiApplication {
 		return canteen;
 	}
 
-	private Weekday dayOfWeekToWeekday(WeekdayRepository weekdayRepository, DayOfWeek weekday){
+	private Weekday dayOfWeekToWeekday(DayOfWeek weekday){
 		String weekdayName = switch (weekday){
 			case MONDAY -> "Montag";
 			case TUESDAY -> "Dienstag";
