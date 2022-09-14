@@ -61,6 +61,10 @@ public class MealParser implements Parser<FetchedMeal> {
     }
 
     private String getString(Elements elements, boolean isAllergen){
+        if(elements.size() == 0){
+            return "";
+        }
+        
         StringBuilder sb = new StringBuilder();
 
         for (Element e : elements) {
@@ -70,7 +74,6 @@ public class MealParser implements Parser<FetchedMeal> {
                 sb.append(e.attr("title")).append(",");
             }
         }
-        if (sb.isEmpty()) return "";
         return sb.substring(0, sb.length()-1);
     }
 }
