@@ -26,7 +26,7 @@ public class Canteen {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "location_id", nullable = false)
-    @JsonBackReference
+    @JsonManagedReference
     private Location location;
 
     @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
