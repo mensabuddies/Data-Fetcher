@@ -36,4 +36,24 @@ public class UserController {
         else
             return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
     }
+
+    @GetMapping(value = "/openinghours/{id}")
+    public ResponseEntity<Object> getOpeningHours(@PathVariable int id) {
+        Canteen c = canteenRepository.findById(id).orElse(null);
+
+        if (c != null)
+            return ResponseHandler.generateResponse("Test", HttpStatus.OK, c.getOpeningHours());
+        else
+            return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
+    }
+
+    @GetMapping(value = "/menus/{id}")
+    public ResponseEntity<Object> getMenus(@PathVariable int id) {
+        Canteen c = canteenRepository.findById(id).orElse(null);
+
+        if (c != null)
+            return ResponseHandler.generateResponse("Test", HttpStatus.OK, c.getMenus());
+        else
+            return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
+    }
 }
