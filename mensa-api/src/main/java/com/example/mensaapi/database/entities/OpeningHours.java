@@ -1,6 +1,7 @@
 package com.example.mensaapi.database.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +27,7 @@ public class OpeningHours {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "weekday_id", nullable = false)
-    @JsonBackReference
+    @JsonManagedReference
     private Weekday weekday;
 
     @Column(name="is_opened")
