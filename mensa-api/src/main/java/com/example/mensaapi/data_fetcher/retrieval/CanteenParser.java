@@ -101,9 +101,27 @@ public class CanteenParser implements Parser<FetchedCanteen> {
         return null;
     }
 
+    private int weekdayNameToInt(String shortName){
+        return switch (shortName) {
+            case "Mo" -> 1;
+            case "Di" -> 2;
+            case "Mi" -> 3;
+            case "Do" -> 4;
+            case "Fr" -> 5;
+            case "Sa" -> 6;
+            case "So" -> 7;
+            default -> 0;
+        };
+    }
+
     private int weekdaysToIteratorNumber(String weekdays) {
-        if (weekdays.equals("Mo - Fr"))
-            return 5;
+        int day1, day2 = 0;
+        if (weekdays.length() > 2) {
+            String[] split = weekdays.split(" - ");
+            day1 = weekdayNameToInt(split[0]);
+            day2 = weekdayNameToInt(split[1]);
+            return (day2 - day1) + 1;
+        }
         if (weekdays.length() == 2)
             return 1;
 
