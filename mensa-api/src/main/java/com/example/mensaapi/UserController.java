@@ -37,7 +37,7 @@ public class UserController {
             return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
     }
 
-    @GetMapping(value = "/openinghours/{id}")
+    @GetMapping(value = "/canteens/{id}/openinghours")
     public ResponseEntity<Object> getOpeningHours(@PathVariable int id) {
         Canteen c = canteenRepository.findById(id).orElse(null);
 
@@ -47,7 +47,7 @@ public class UserController {
             return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
     }
 
-    @GetMapping(value = "/menus/{id}")
+    @GetMapping(value = "/canteens/{id}/menus")
     public ResponseEntity<Object> getMenus(@PathVariable int id) {
         Canteen c = canteenRepository.findById(id).orElse(null);
 
