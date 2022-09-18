@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.sql.SQLOutput;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -25,148 +26,126 @@ import java.util.function.BiFunction;
 @SpringBootApplication
 public class MensaApiApplication {
 
-	@Autowired WeekdayRepository weekdayRepository;
-	@Autowired LocationRepository locationRepository;
-	@Autowired CanteenRepository canteenRepository;
-	@Autowired MealRepository mealRepository;
-	@Autowired MenuRepository menuRepository;
+    @Autowired
+    WeekdayRepository weekdayRepository;
+    @Autowired
+    LocationRepository locationRepository;
+    @Autowired
+    CanteenRepository canteenRepository;
+    @Autowired
+    MealRepository mealRepository;
+    @Autowired
+    MenuRepository menuRepository;
 
-	public static void main(String[] args) {
-		SpringApplication.run(MensaApiApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(MensaApiApplication.class, args);
+    }
 
-	@Bean
-	public CommandLineRunner run(){
-		return (args -> {
-			Util u = new Util();
-			u.insertWeekdays(weekdayRepository);
-			u.insertLocations(locationRepository);
+    @Bean
+    public CommandLineRunner run() {
+        return (args -> {
+            Util u = new Util();
+            u.insertWeekdays(weekdayRepository);
+            u.insertLocations(locationRepository);
 
-			saveLatestData();
-		});
-	}
-
-
-	private void saveLatestData() {
-		storeStudentenwerkDataInDatabase();
-	}
-
-	@Scheduled(cron = "0 0 0 * * *") // Täglich um 0 Uhr
-	private void storeStudentenwerkDataInDatabase(){
-		List<FetchedCanteen> fetchedCanteens = new DataFetcher().get();
-
-		for(FetchedCanteen fetchedCanteen : fetchedCanteens){
-			// First, we store the canteen with its details (like opening hours, etc.)
-			Canteen canteen = storeCanteen(fetchedCanteen);
-
-			// Then, we store the meals
-			for(FetchedDay mealsForTheDay : fetchedCanteen.getMenus()){
-				for(FetchedMeal fetchedMeal : mealsForTheDay.getMeals()){
-					Meal meal = storeMeal(fetchedMeal);
-					storeMenu(canteen, meal, mealsForTheDay.getDate());
-				}
-			}
-		}
-	}
-
-	private Menu storeMenu(Canteen canteen, Meal meal, LocalDate date){
-		// Create a menu
-		Menu menu = menuRepository.save(new Menu(canteen, date));
-
-		Set<Menu> menusTheMealIsOn = meal.getMenus();
-		menusTheMealIsOn.add(menu);
-		meal.setMenus(menusTheMealIsOn);
-
-		menu.setMeal(meal);
-		menuRepository.save(menu);
-
-		return menu;
-	}
-
-	private Meal storeMeal(FetchedMeal fetchedMeal){
-		Meal meal = new Meal(
-				fetchedMeal.getName(),
-				fetchedMeal.getPriceStudent(),
-				fetchedMeal.getPriceEmployee(),
-				fetchedMeal.getPriceGuest(),
-				fetchedMeal.getAllergensRaw(),
-				fetchedMeal.getIngredientsRaw()
-		);
-
-		// Check if this meal has ever been served in the exact same configuration
-			Meal m = mealRepository.getMealByName(fetchedMeal.getName());
-			// Is there even a meal with this name?
-			if(m != null){
-				// Are all details the same?
-				if(m.getPriceStudent() == fetchedMeal.getPriceStudent() &&
-						m.getPriceEmployee() == fetchedMeal.getPriceEmployee() &&
-						m.getPriceGuest() == fetchedMeal.getPriceGuest() &&
-						m.getAllergens().equals(fetchedMeal.getAllergensRaw()) &&
-						m.getIngredients().equals(fetchedMeal.getIngredientsRaw())
-				){
-					// if yes, override the previously created object with the data from the database
-					System.out.println("Duplicate found!");
-					meal = m;
-				}
-			} else {
-				meal = mealRepository.save(meal);
-			}
-
-		return meal;
-	}
-
-	private Canteen storeCanteen(FetchedCanteen fetchedCanteen){
-		// TODO: More efficient with findByName, but has to be implemented
-		BiFunction<Iterable<Canteen>, String,Integer> getId = (canteens, canteenName) -> {
-			for (Canteen c : canteens) {
-				if (c.getName().equals(canteenName)) return c.getId();
-			}
-			return -1;
-		};
-
-		Integer idInDB = getId.apply(canteenRepository.findAll(), fetchedCanteen.getName());
-
-		Canteen canteen = canteenRepository.findById(idInDB).orElse(new Canteen());
-
-		canteen.setName(fetchedCanteen.getName());
-		canteen.setLocation(locationRepository.getLocationByName(fetchedCanteen.getLocation().getValue()));
-		canteen.setInfo(fetchedCanteen.getTitleInfo());
-		canteen.setAdditionalInfo(fetchedCanteen.getBodyInfo());
-		canteen.setLinkToFoodPlan(fetchedCanteen.getLinkToFoodPlan());
-		//canteenRepository.save(canteen);
+            saveLatestData();
+        });
+    }
 
 
-		Set<OpeningHours> openingHours = new HashSet<>();
-		for(FetchedOpeningHours f : fetchedCanteen.getOpeningHours()){
-			openingHours.add(
-					new OpeningHours(
-							canteen,
-							dayOfWeekToWeekday(f.getWeekday()),
-							f.isOpen(),
-							f.getOpeningAt(),
-							f.getClosingAt(),
-							f.getGetAMealTill()
-					));
-		}
-		canteen.setOpeningHours(openingHours);
-		canteenRepository.save(canteen);
+    private void saveLatestData() {
+        storeStudentenwerkDataInDatabase();
+    }
 
-		return canteen;
-	}
+    @Scheduled(cron = "0 0 0 * * *") // Täglich um 0 Uhr
+    private void storeStudentenwerkDataInDatabase() {
+        List<FetchedCanteen> fetchedCanteens = new DataFetcher().get();
 
-	private Weekday dayOfWeekToWeekday(DayOfWeek weekday){
-		String weekdayName = switch (weekday){
-			case MONDAY -> "Montag";
-			case TUESDAY -> "Dienstag";
-			case WEDNESDAY -> "Mittwoch";
-			case THURSDAY -> "Donnerstag";
-			case FRIDAY -> "Freitag";
-			case SATURDAY -> "Samstag";
-			case SUNDAY -> "Sonntag";
-		};
-		return weekdayRepository.getWeekdayByName(weekdayName);
-	}
+        for (FetchedCanteen fetchedCanteen : fetchedCanteens) {
+            // First, we store the canteen with its details (like opening hours, etc.)
+            Canteen canteen = storeCanteen(fetchedCanteen);
 
+            // Then, we store the meals
+            for (FetchedDay mealsForTheDay : fetchedCanteen.getMenus()) {
+                for (FetchedMeal fetchedMeal : mealsForTheDay.getMeals()) {
+                    Meal meal = storeMeal(fetchedMeal);
+                    menuRepository.save(new Menu(canteen, meal, mealsForTheDay.getDate()));
+                }
+            }
+        }
+    }
+
+    private Meal storeMeal(FetchedMeal fetchedMeal) {
+        Meal meal = new Meal(
+                fetchedMeal.getName(),
+                fetchedMeal.getPriceStudent(),
+                fetchedMeal.getPriceEmployee(),
+                fetchedMeal.getPriceGuest(),
+                fetchedMeal.getAllergensRaw(),
+                fetchedMeal.getIngredientsRaw()
+        );
+
+        // Check if this meal has ever been served in the exact same configuration
+        Meal m = mealRepository.getMealByName(fetchedMeal.getName());
+        // Is there even a meal with this name?
+        if (m != null) {
+            // Are all details the same?
+            if (m.getPriceStudent() == fetchedMeal.getPriceStudent() &&
+                    m.getPriceEmployee() == fetchedMeal.getPriceEmployee() &&
+                    m.getPriceGuest() == fetchedMeal.getPriceGuest() &&
+                    m.getAllergens().equals(fetchedMeal.getAllergensRaw()) &&
+                    m.getIngredients().equals(fetchedMeal.getIngredientsRaw())
+            ) {
+                // if yes, override the previously created object with the data from the database
+                System.out.println("Duplicate found!");
+                return m;
+            }
+        }
+
+        return mealRepository.save(meal);
+    }
+
+    private Canteen storeCanteen(FetchedCanteen fetchedCanteen) {
+        Canteen canteen = canteenRepository.getCanteenByName(fetchedCanteen.getName()).orElse(new Canteen());
+
+        canteen.setName(fetchedCanteen.getName());
+        canteen.setLocation(locationRepository.getLocationByName(fetchedCanteen.getLocation().getValue()));
+        canteen.setInfo(fetchedCanteen.getTitleInfo());
+        canteen.setAdditionalInfo(fetchedCanteen.getBodyInfo());
+        canteen.setLinkToFoodPlan(fetchedCanteen.getLinkToFoodPlan());
+        //canteenRepository.save(canteen);
+
+
+        Set<OpeningHours> openingHours = new HashSet<>();
+        for (FetchedOpeningHours f : fetchedCanteen.getOpeningHours()) {
+            openingHours.add(
+                    new OpeningHours(
+                            canteen,
+                            dayOfWeekToWeekday(f.getWeekday()),
+                            f.isOpen(),
+                            f.getOpeningAt(),
+                            f.getClosingAt(),
+                            f.getGetAMealTill()
+                    ));
+        }
+        canteen.setOpeningHours(openingHours);
+        canteenRepository.save(canteen);
+
+        return canteen;
+    }
+
+    private Weekday dayOfWeekToWeekday(DayOfWeek weekday) {
+        String weekdayName = switch (weekday) {
+            case MONDAY -> "Montag";
+            case TUESDAY -> "Dienstag";
+            case WEDNESDAY -> "Mittwoch";
+            case THURSDAY -> "Donnerstag";
+            case FRIDAY -> "Freitag";
+            case SATURDAY -> "Samstag";
+            case SUNDAY -> "Sonntag";
+        };
+        return weekdayRepository.getWeekdayByName(weekdayName);
+    }
 
 
 }

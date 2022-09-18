@@ -25,7 +25,7 @@ public class DataFetcher {
                 fetchedCanteens.add(canteenParser.parse(mensa).orElseThrow());
             }
         });
-        System.out.println(fetchedCanteens);
+        //System.out.println(fetchedCanteens);
     }
 
     public List<FetchedCanteen> get(){

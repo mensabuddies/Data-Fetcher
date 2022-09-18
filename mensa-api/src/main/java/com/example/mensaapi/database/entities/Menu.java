@@ -24,7 +24,7 @@ public class Menu {
     @JsonBackReference
     private Canteen canteen;
 
-    @ManyToOne(cascade=CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "meal_id")
     @JsonBackReference
     private Meal meal;
