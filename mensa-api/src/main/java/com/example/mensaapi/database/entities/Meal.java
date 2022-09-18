@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -49,5 +50,6 @@ public class Meal {
         this.priceGuest = priceGuest;
         this.allergens = allergens;
         this.ingredients = ingredients;
+        this.menus = new HashSet<>();
     }
 }

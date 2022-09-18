@@ -66,14 +66,19 @@ public class MensaApiApplication {
 					storeMenu(canteen, meal, mealsForTheDay.getDate());
 				}
 			}
-
-			// TODO: Link meals to canteens via menus
 		}
 	}
 
 	private Menu storeMenu(Canteen canteen, Meal meal, LocalDate date){
-		// Create a menu with that meal
-		Menu menu = menuRepository.save(new Menu(canteen, meal, date));
+		// Create a menu
+		Menu menu = menuRepository.save(new Menu(canteen, date));
+
+		Set<Menu> menusTheMealIsOn = meal.getMenus();
+		menusTheMealIsOn.add(menu);
+		meal.setMenus(menusTheMealIsOn);
+
+		menu.setMeal(meal);
+		menuRepository.save(menu);
 
 		return menu;
 	}
@@ -111,11 +116,9 @@ public class MensaApiApplication {
 	}
 
 	private Canteen storeCanteen(FetchedCanteen fetchedCanteen){
-
 		// TODO: More efficient with findByName, but has to be implemented
 		BiFunction<Iterable<Canteen>, String,Integer> getId = (canteens, canteenName) -> {
-			for (Canteen c:
-					canteens) {
+			for (Canteen c : canteens) {
 				if (c.getName().equals(canteenName)) return c.getId();
 			}
 			return -1;
