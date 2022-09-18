@@ -30,4 +30,10 @@ public class Menu {
     private Meal meal;
 
     private LocalDate date;
+
+    public Menu(Canteen canteen, Meal meal, LocalDate date) {
+        this.canteen = canteen;
+        this.meal = meal;
+        this.date = date;
+    }
 }

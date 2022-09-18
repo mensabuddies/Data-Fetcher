@@ -38,7 +38,7 @@ public class Meal {
     @Column
     private String ingredients;
 
-    @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private Set<Menu> menus;
 

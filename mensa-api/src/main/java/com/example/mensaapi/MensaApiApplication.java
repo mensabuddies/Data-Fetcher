@@ -7,21 +7,16 @@ import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedMeal;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedOpeningHours;
 import com.example.mensaapi.database.Util;
 import com.example.mensaapi.database.entities.*;
-import com.example.mensaapi.database.repositories.CanteenRepository;
-import com.example.mensaapi.database.repositories.LocationRepository;
-import com.example.mensaapi.database.repositories.WeekdayRepository;
+import com.example.mensaapi.database.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.DayOfWeek;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +28,8 @@ public class MensaApiApplication {
 	@Autowired WeekdayRepository weekdayRepository;
 	@Autowired LocationRepository locationRepository;
 	@Autowired CanteenRepository canteenRepository;
+	@Autowired MealRepository mealRepository;
+	@Autowired MenuRepository menuRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(MensaApiApplication.class, args);
@@ -65,7 +62,8 @@ public class MensaApiApplication {
 			// Then, we store the meals
 			for(FetchedDay mealsForTheDay : fetchedCanteen.getMenus()){
 				for(FetchedMeal fetchedMeal : mealsForTheDay.getMeals()){
-					storeMeal(fetchedMeal);
+					Meal meal = storeMeal(fetchedMeal);
+					storeMenu(canteen, meal, mealsForTheDay.getDate());
 				}
 			}
 
@@ -73,9 +71,43 @@ public class MensaApiApplication {
 		}
 	}
 
+	private Menu storeMenu(Canteen canteen, Meal meal, LocalDate date){
+		// Create a menu with that meal
+		Menu menu = menuRepository.save(new Menu(canteen, meal, date));
+
+		return menu;
+	}
+
 	private Meal storeMeal(FetchedMeal fetchedMeal){
-		// TODO
-		return null;
+		Meal meal = new Meal(
+				fetchedMeal.getName(),
+				fetchedMeal.getPriceStudent(),
+				fetchedMeal.getPriceEmployee(),
+				fetchedMeal.getPriceGuest(),
+				fetchedMeal.getAllergensRaw(),
+				fetchedMeal.getIngredientsRaw()
+		);
+
+		// Check if this meal has ever been served in the exact same configuration
+			Meal m = mealRepository.getMealByName(fetchedMeal.getName());
+			// Is there even a meal with this name?
+			if(m != null){
+				// Are all details the same?
+				if(m.getPriceStudent() == fetchedMeal.getPriceStudent() &&
+						m.getPriceEmployee() == fetchedMeal.getPriceEmployee() &&
+						m.getPriceGuest() == fetchedMeal.getPriceGuest() &&
+						m.getAllergens().equals(fetchedMeal.getAllergensRaw()) &&
+						m.getIngredients().equals(fetchedMeal.getIngredientsRaw())
+				){
+					// if yes, override the previously created object with the data from the database
+					System.out.println("Duplicate found!");
+					meal = m;
+				}
+			} else {
+				meal = mealRepository.save(meal);
+			}
+
+		return meal;
 	}
 
 	private Canteen storeCanteen(FetchedCanteen fetchedCanteen){
