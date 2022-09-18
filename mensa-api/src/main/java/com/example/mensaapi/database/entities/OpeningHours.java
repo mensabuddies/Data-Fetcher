@@ -44,7 +44,7 @@ public class OpeningHours {
 
     public OpeningHours(Canteen canteen, Weekday weekday, boolean isOpened, String opensAt, String closesAt, String getFoodTill){
         this.canteen = canteen;
-        this.isOpened = isOpened();
+        this.isOpened = isOpened;
         this.weekday = weekday;
         this.opensAt = opensAt;
         this.closesAt = closesAt;
