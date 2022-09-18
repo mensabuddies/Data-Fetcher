@@ -20,14 +20,25 @@ public class Menu {
     private Integer id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "canteen_id", nullable = false)
+    @JoinColumn(name = "canteen_id")
     @JsonBackReference
     private Canteen canteen;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "meal_id", nullable = false)
+    @ManyToOne()
+    @JoinColumn(name = "meal_id")
     @JsonBackReference
     private Meal meal;
 
     private LocalDate date;
+
+    public Menu(Canteen canteen, Meal meal, LocalDate date) {
+        this.canteen = canteen;
+        this.meal = meal;
+        this.date = date;
+    }
+
+    public Menu(Canteen canteen, LocalDate date){
+        this.canteen = canteen;
+        this.date = date;
+    }
 }

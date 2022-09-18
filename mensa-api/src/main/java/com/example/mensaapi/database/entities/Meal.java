@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -13,13 +15,14 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
+@ToString
 public class Meal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "meal_id")
     private Integer id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     // Prices in cent
@@ -38,7 +41,7 @@ public class Meal {
     @Column
     private String ingredients;
 
-    @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private Set<Menu> menus;
 
@@ -49,5 +52,6 @@ public class Meal {
         this.priceGuest = priceGuest;
         this.allergens = allergens;
         this.ingredients = ingredients;
+        this.menus = new HashSet<>();
     }
 }
