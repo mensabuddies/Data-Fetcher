@@ -44,11 +44,13 @@ public class MensaApiApplication {
     @Bean
     public CommandLineRunner run() {
         return (args -> {
-            Util u = new Util();
-            u.insertWeekdays(weekdayRepository);
-            u.insertLocations(locationRepository);
-
-            saveLatestData();
+            if(!weekdayRepository.findById(1).isPresent()){
+                Util u = new Util();
+                u.insertWeekdays(weekdayRepository);
+                u.insertLocations(locationRepository);
+            }
+            /// For debugging
+            //saveLatestData();
         });
     }
 
