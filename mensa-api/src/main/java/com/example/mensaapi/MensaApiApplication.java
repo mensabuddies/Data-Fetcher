@@ -50,7 +50,7 @@ public class MensaApiApplication {
                 u.insertLocations(locationRepository);
             }
             /// For debugging
-            //saveLatestData();
+            // saveLatestData();
         });
     }
 
