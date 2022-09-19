@@ -25,7 +25,7 @@ public class Menu {
     @JsonBackReference
     private FoodProvider foodProvider;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "meal_id")
     @JsonManagedReference
     private Meal meal;

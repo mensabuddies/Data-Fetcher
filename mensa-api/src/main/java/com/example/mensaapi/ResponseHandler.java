@@ -13,6 +13,14 @@ public class ResponseHandler {
         map.put("status", status.value());
         map.put("data", responseObj);
 
-        return new ResponseEntity<>(map, status);
+        return new ResponseEntity<>(map,status);
+    }
+
+    public static ResponseEntity<Object> generateResponse(HttpStatus status, Object responseObj) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("status", status.value());
+        map.put("data", responseObj);
+
+        return new ResponseEntity<>(map,status);
     }
 }

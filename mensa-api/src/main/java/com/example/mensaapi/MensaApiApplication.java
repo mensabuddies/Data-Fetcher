@@ -58,7 +58,7 @@ public class MensaApiApplication {
                 u.insertTypes(foodProviderTypeRepository);
             }
             /// For debugging
-            //saveLatestData();
+            // saveLatestData();
         });
     }
 
