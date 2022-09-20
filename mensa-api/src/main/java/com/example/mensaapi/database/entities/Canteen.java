@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.net.URL;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -31,7 +32,7 @@ public class Canteen {
 
     @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
     @JsonManagedReference
-    private Set<OpeningHours> openingHours;
+    private List<OpeningHours> openingHours;
 
     private String info;
 

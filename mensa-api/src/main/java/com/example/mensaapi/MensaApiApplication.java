@@ -15,13 +15,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.sql.SQLOutput;
 import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.util.HashSet;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.function.BiFunction;
+import java.util.Locale;
 
 @SpringBootApplication
 public class MensaApiApplication {
@@ -37,6 +35,9 @@ public class MensaApiApplication {
     @Autowired
     MenuRepository menuRepository;
 
+    @Autowired
+    OpeningHoursRepository openingHoursRepository;
+
     public static void main(String[] args) {
         SpringApplication.run(MensaApiApplication.class, args);
     }
@@ -44,7 +45,7 @@ public class MensaApiApplication {
     @Bean
     public CommandLineRunner run() {
         return (args -> {
-            if(!weekdayRepository.findById(1).isPresent()){
+            if (!weekdayRepository.findById(1).isPresent()) {
                 Util u = new Util();
                 u.insertWeekdays(weekdayRepository);
                 u.insertLocations(locationRepository);
@@ -59,7 +60,8 @@ public class MensaApiApplication {
         storeStudentenwerkDataInDatabase();
     }
 
-    @Scheduled(cron = "0 0 0 * * *") // Täglich um 0 Uhr
+    //@Scheduled(cron = "0 0 0 * * *") // Täglich um 0 Uhr
+    @Scheduled(fixedDelay = 10000)
     private void storeStudentenwerkDataInDatabase() {
         List<FetchedCanteen> fetchedCanteens = new DataFetcher().get();
 
@@ -88,19 +90,22 @@ public class MensaApiApplication {
         );
 
         // Check if this meal has ever been served in the exact same configuration
-        Meal m = mealRepository.getMealByName(fetchedMeal.getName());
+        List<Meal> meals = mealRepository.getMealByName(fetchedMeal.getName());
         // Is there even a meal with this name?
-        if (m != null) {
+        if (meals != null && !meals.isEmpty()) {
             // Are all details the same?
-            if (m.getPriceStudent() == fetchedMeal.getPriceStudent() &&
-                    m.getPriceEmployee() == fetchedMeal.getPriceEmployee() &&
-                    m.getPriceGuest() == fetchedMeal.getPriceGuest() &&
-                    m.getAllergens().equals(fetchedMeal.getAllergensRaw()) &&
-                    m.getIngredients().equals(fetchedMeal.getIngredientsRaw())
-            ) {
-                // if yes, override the previously created object with the data from the database
-                System.out.println("Duplicate found!");
-                return m;
+            for (Meal m :
+                    meals) {
+                if (m.getPriceStudent() == fetchedMeal.getPriceStudent() &&
+                        m.getPriceEmployee() == fetchedMeal.getPriceEmployee() &&
+                        m.getPriceGuest() == fetchedMeal.getPriceGuest() &&
+                        m.getAllergens().equals(fetchedMeal.getAllergensRaw()) &&
+                        m.getIngredients().equals(fetchedMeal.getIngredientsRaw())
+                ) {
+                    // if yes, override the previously created object with the data from the database
+                    System.out.println("Duplicate found!");
+                    return m;
+                }
             }
         }
 
@@ -117,23 +122,77 @@ public class MensaApiApplication {
         canteen.setLinkToFoodPlan(fetchedCanteen.getLinkToFoodPlan());
         //canteenRepository.save(canteen);
 
+        //openingHoursRepository.deleteByCanteenId(canteen.getId());
+        List<OpeningHours> openingHours = openingHoursRepository.findByCanteenIdEqualsOrderByWeekday(canteen.getId()).orElse(new ArrayList<>());
 
-        Set<OpeningHours> openingHours = new HashSet<>();
-        for (FetchedOpeningHours f : fetchedCanteen.getOpeningHours()) {
-            openingHours.add(
-                    new OpeningHours(
-                            canteen,
-                            dayOfWeekToWeekday(f.getWeekday()),
-                            f.isOpen(),
-                            f.getOpeningAt(),
-                            f.getClosingAt(),
-                            f.getGetAMealTill()
-                    ));
+        if (!openingHours.isEmpty()) {
+            for (int i = 0; i < openingHours.size(); i++) {
+                var oh = openingHours.get(i);
+
+                updateOrInsertOpeningHours(
+                        oh,
+                        openingHours,
+                        fetchedCanteen,
+                        canteen
+                );
+
+            }
+        } else {
+            for (FetchedOpeningHours foh : fetchedCanteen.getOpeningHours()) {
+                openingHours.add(new OpeningHours(
+                        canteen,
+                        dayOfWeekToWeekday(foh.getWeekday()),
+                        foh.isOpen(),
+                        foh.getOpeningAt(),
+                        foh.getClosingAt(),
+                        foh.getGetAMealTill()
+                ));
+
+            }
         }
+
+
         canteen.setOpeningHours(openingHours);
+
         canteenRepository.save(canteen);
 
         return canteen;
+    }
+
+    private void updateOrInsertOpeningHours(OpeningHours oh, List<OpeningHours> openingHours, FetchedCanteen fetchedCanteen, Canteen canteen) {
+        for (int j = 0; j < fetchedCanteen.getOpeningHours().size(); j++) {
+            var foh = fetchedCanteen.getOpeningHours().get(j);
+
+            if (oh.getWeekday().getName().equalsIgnoreCase(foh.getWeekday().getDisplayName(TextStyle.FULL, Locale.GERMAN))) {
+                if (oh.isOpened() != foh.isOpen() ||
+                        !oh.getOpensAt().equals(foh.getOpeningAt()) ||
+                        !oh.getClosesAt().equals(foh.getClosingAt()) ||
+                        !oh.getGetFoodTill().equals(foh.getGetAMealTill())) {
+
+                    //iterator.remove();
+                    //openingHours.remove(oh);
+                    oh.setOpened(foh.isOpen());
+                    oh.setWeekday(dayOfWeekToWeekday(foh.getWeekday()));
+                    oh.setOpensAt(foh.getOpeningAt());
+                    oh.setClosesAt(foh.getClosingAt());
+                    oh.setGetFoodTill(foh.getGetAMealTill());
+
+                }
+                return; // Break loop
+            }
+            if (j == fetchedCanteen.getOpeningHours().size() - 1) {
+                // If last element, then insert data
+                openingHours.add(new OpeningHours(
+                        canteen,
+                        dayOfWeekToWeekday(foh.getWeekday()),
+                        foh.isOpen(),
+                        foh.getOpeningAt(),
+                        foh.getClosingAt(),
+                        foh.getGetAMealTill()
+                ));
+            }
+        }
+
     }
 
     private Weekday dayOfWeekToWeekday(DayOfWeek weekday) {
