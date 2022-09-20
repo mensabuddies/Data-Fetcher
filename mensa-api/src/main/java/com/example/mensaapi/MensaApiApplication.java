@@ -83,7 +83,7 @@ public class MensaApiApplication {
                         for (FetchedMeal fetchedMeal : mealsForTheDay.getMeals()) {
                             Meal meal = storeMeal(fetchedMeal);
                             // Create and save new menu if it does not exist already
-                            menuRepository.findMenuByDateAndMeal(mealsForTheDay.getDate(), meal).ifPresentOrElse(
+                            menuRepository.findByDateAndMeal(mealsForTheDay.getDate(), meal).ifPresentOrElse(
                                     /* if present: */ menu1 -> System.out.println("Duplicate menu found!"),
                                     /* or else: */() -> menuRepository.save(new Menu(foodProvider, meal, mealsForTheDay.getDate()))
                             );

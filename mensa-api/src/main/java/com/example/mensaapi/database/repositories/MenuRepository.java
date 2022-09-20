@@ -10,9 +10,11 @@ import java.util.List;
 
 public interface MenuRepository extends CrudRepository<Menu, Integer> {
 
-    Optional<Menu> findMenuByDateAndMeal(LocalDate data, Meal meal);
+    Optional<Menu> findByDateAndMeal(LocalDate data, Meal meal);
 
-    List<Menu> findMenuByFoodProviderIdOrderByDate(int foodProviderId);
+    //Optional<Menu> findMenuByFoodProviderIdAndDate(int foodProviderId, LocalDate date);
 
-    List<Menu> findMenuByFoodProviderIdAndDate(int foodProviderId, LocalDate date);
+    Optional<List<Menu>> findByFoodProviderIdEqualsOrderByDate(int foodProviderId);
+
+    Optional<List<Menu>> findByFoodProviderIdEqualsAndDate(int foodProviderId, LocalDate date);
 }
