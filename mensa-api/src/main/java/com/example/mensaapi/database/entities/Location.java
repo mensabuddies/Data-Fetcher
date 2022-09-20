@@ -1,7 +1,6 @@
 package com.example.mensaapi.database.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,9 +24,9 @@ public class Location {
 
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)
     @JsonBackReference
-    private Set<Canteen> canteens;
+    private Set<FoodProvider> foodProviders;
 
-    public Location(String name){
+    public Location(String name) {
         this.name = name;
     }
 }

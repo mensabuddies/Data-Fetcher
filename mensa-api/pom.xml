@@ -12,7 +12,7 @@
 	<artifactId>mensa-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>mensa-api</name>
-	<description>API for getting information about the canteens of the Studentenwerk Würzburg</description>
+	<description>API for getting information about the foodProviders of the Studentenwerk Würzburg</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>

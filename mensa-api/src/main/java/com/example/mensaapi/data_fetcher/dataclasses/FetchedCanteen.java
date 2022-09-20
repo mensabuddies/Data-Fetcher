@@ -1,16 +1,17 @@
 package com.example.mensaapi.data_fetcher.dataclasses;
 
+import com.example.mensaapi.data_fetcher.dataclasses.enums.FetchedFoodProviderType;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
-import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedCanteen;
+import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedFoodProvider;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedOpeningHours;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public class FetchedCanteenImplementation implements FetchedCanteen {
+public class FetchedCanteen implements FetchedFoodProvider {
     private final String name;
-    private final Location location;
+    private Location location;
     private final String info;
     private final List<FetchedOpeningHours> fetchedOpeningHours;
     private final String additional;
@@ -19,7 +20,7 @@ public class FetchedCanteenImplementation implements FetchedCanteen {
 
     private final List<FetchedDay> menusPerFetchedDay;
 
-    public FetchedCanteenImplementation(
+    public FetchedCanteen(
             String name,
             Location location,
             String info,
@@ -78,6 +79,11 @@ public class FetchedCanteenImplementation implements FetchedCanteen {
     }
 
     @Override
+    public FetchedFoodProviderType getType() {
+        return FetchedFoodProviderType.CANTEEN;
+    }
+
+    @Override
     public String toString() {
         return "Canteen{" +
                 "name='" + name + '\'' +
@@ -88,5 +94,10 @@ public class FetchedCanteenImplementation implements FetchedCanteen {
                 ", linkToFoodPlan=" + linkToFoodPlan +
                 ", meals=" + menusPerFetchedDay +
                 "}\n";
+    }
+
+    @Override
+    public void setLocation(Location location) {
+        this.location = location;
     }
 }

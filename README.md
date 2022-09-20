@@ -3,7 +3,7 @@
 
 > Currently still under development!
 
-Makes the meals of the canteens of the Studentenwerk Würzburg accessible via an API.
+Makes the meals of the foodProviders of the Studentenwerk Würzburg accessible via an API.
 
 ## ER-Diagram
 You can find a up-to-date version here: [DrawSQL](https://drawsql.app/teams/timos-team/diagrams/mensa-app)

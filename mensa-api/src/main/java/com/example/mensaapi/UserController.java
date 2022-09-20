@@ -1,9 +1,11 @@
 package com.example.mensaapi;
 
-import com.example.mensaapi.database.entities.Canteen;
+import com.example.mensaapi.data_fetcher.dataclasses.enums.FetchedFoodProviderType;
+import com.example.mensaapi.database.entities.FoodProvider;
 import com.example.mensaapi.database.entities.Meal;
 import com.example.mensaapi.database.entities.Menu;
-import com.example.mensaapi.database.repositories.CanteenRepository;
+import com.example.mensaapi.database.repositories.FoodProviderRepository;
+import com.example.mensaapi.database.repositories.FoodProviderTypeRepository;
 import com.example.mensaapi.database.repositories.MealRepository;
 import com.example.mensaapi.database.repositories.MenuRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +20,40 @@ import java.util.List;
 
 @RestController
 public class UserController {
-    @Autowired CanteenRepository canteenRepository;
-    @Autowired MenuRepository menuRepository;
+    @Autowired
+    FoodProviderRepository foodProviderRepository;
+    @Autowired
+    MenuRepository menuRepository;
 
-    @Autowired MealRepository mealRepository;
+    @Autowired
+    MealRepository mealRepository;
+
+    @Autowired
+    FoodProviderTypeRepository foodProviderTypeRepository;
 
     @GetMapping(value = "/canteens")
     public ResponseEntity<Object> getCanteens() {
         try {
-            List<Canteen> canteens = new ArrayList<>();
-            canteenRepository.findAll().iterator().forEachRemaining(canteens::add);
-            return ResponseHandler.generateResponse("Test", HttpStatus.OK, canteens);
+            List<FoodProvider> foodProviders = new ArrayList<>();
+
+            foodProviderRepository.getFoodProvidersByType(foodProviderTypeRepository.findByName(FetchedFoodProviderType.CANTEEN.getValue()))
+                    .orElseThrow().iterator().forEachRemaining(foodProviders::add);
+
+            return ResponseHandler.generateResponse("Test", HttpStatus.OK, foodProviders);
+        } catch (Exception e) {
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+    @GetMapping(value = "/cafeterias")
+    public ResponseEntity<Object> getCafeterias() {
+        try {
+            List<FoodProvider> foodProviders = new ArrayList<>();
+
+            foodProviderRepository.getFoodProvidersByType(foodProviderTypeRepository.findByName(FetchedFoodProviderType.CAFETERIA.getValue()))
+                    .orElseThrow().iterator().forEachRemaining(foodProviders::add);
+
+            return ResponseHandler.generateResponse("Test", HttpStatus.OK, foodProviders);
         } catch (Exception e) {
             return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
@@ -36,9 +61,19 @@ public class UserController {
 
     @GetMapping(value = "/canteens/{id}")
     public ResponseEntity<Object> getCanteen(@PathVariable int id) {
-        Canteen c = canteenRepository.findById(id).orElse(null);
+        FoodProvider c = foodProviderRepository.findById(id).orElse(null);
 
-        if (c != null)
+        if (c != null && c.getType().getName().equals(FetchedFoodProviderType.CANTEEN.getValue()))
+            return ResponseHandler.generateResponse("Test", HttpStatus.OK, c);
+        else
+            return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
+    }
+
+    @GetMapping(value = "/cafeteria/{id}")
+    public ResponseEntity<Object> getCafeteria(@PathVariable int id) {
+        FoodProvider c = foodProviderRepository.findById(id).orElse(null);
+
+        if (c != null && c.getType().getName().equals(FetchedFoodProviderType.CAFETERIA.getValue()))
             return ResponseHandler.generateResponse("Test", HttpStatus.OK, c);
         else
             return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
@@ -46,9 +81,19 @@ public class UserController {
 
     @GetMapping(value = "/canteens/{id}/openinghours")
     public ResponseEntity<Object> getOpeningHours(@PathVariable int id) {
-        Canteen c = canteenRepository.findById(id).orElse(null);
+        FoodProvider c = foodProviderRepository.findById(id).orElse(null);
 
-        if (c != null)
+        if (c != null && c.getType().getName().equals(FetchedFoodProviderType.CANTEEN.getValue()))
+            return ResponseHandler.generateResponse("Test", HttpStatus.OK, c.getOpeningHours());
+        else
+            return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
+    }
+
+    @GetMapping(value = "/cafeteria/{id}/openinghours")
+    public ResponseEntity<Object> getOpeningHoursCafe(@PathVariable int id) {
+        FoodProvider c = foodProviderRepository.findById(id).orElse(null);
+
+        if (c != null && c.getType().getName().equals(FetchedFoodProviderType.CAFETERIA.getValue()))
             return ResponseHandler.generateResponse("Test", HttpStatus.OK, c.getOpeningHours());
         else
             return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
@@ -56,7 +101,7 @@ public class UserController {
 
     @GetMapping(value = "/canteens/{id}/menus")
     public ResponseEntity<Object> getMenusOfCanteen(@PathVariable int id) {
-        Canteen c = canteenRepository.findById(id).orElse(null);
+        FoodProvider c = foodProviderRepository.findById(id).orElse(null);
 
         if (c != null)
             return ResponseHandler.generateResponse("Test", HttpStatus.OK, c.getMenus());

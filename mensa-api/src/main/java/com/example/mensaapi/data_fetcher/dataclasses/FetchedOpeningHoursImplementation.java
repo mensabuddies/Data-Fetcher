@@ -1,15 +1,16 @@
 package com.example.mensaapi.data_fetcher.dataclasses;
+
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedOpeningHours;
 
 import java.time.DayOfWeek;
 
 public class FetchedOpeningHoursImplementation implements FetchedOpeningHours {
-    private DayOfWeek weekday;
-    private boolean open;
-    private String openingAt;
-    private String closingAt;
+    private final DayOfWeek weekday;
+    private final boolean open;
+    private final String openingAt;
+    private final String closingAt;
 
-    private String getAMealTill;
+    private final String getAMealTill;
 
     public FetchedOpeningHoursImplementation(DayOfWeek weekday, boolean open, String openingAt, String closingAt, String getAMealTill) {
         this.weekday = weekday;

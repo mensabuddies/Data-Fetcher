@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalTime;
 
 @Entity
 @Table(name = "opening_hours")
@@ -21,16 +20,16 @@ public class OpeningHours {
     private Integer id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "canteen_id", nullable = false)
+    @JoinColumn(name = "food_provider_id", nullable = false)
     @JsonBackReference
-    private Canteen canteen;
+    private FoodProvider foodProvider;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "weekday_id", nullable = false)
     @JsonManagedReference
     private Weekday weekday;
 
-    @Column(name="is_opened")
+    @Column(name = "is_opened")
     private boolean isOpened;
 
     @Column(name = "opens_at")
@@ -42,8 +41,8 @@ public class OpeningHours {
     @Column(name = "get_food_till")
     private String getFoodTill;
 
-    public OpeningHours(Canteen canteen, Weekday weekday, boolean isOpened, String opensAt, String closesAt, String getFoodTill){
-        this.canteen = canteen;
+    public OpeningHours(FoodProvider foodProvider, Weekday weekday, boolean isOpened, String opensAt, String closesAt, String getFoodTill) {
+        this.foodProvider = foodProvider;
         this.isOpened = isOpened;
         this.weekday = weekday;
         this.opensAt = opensAt;
