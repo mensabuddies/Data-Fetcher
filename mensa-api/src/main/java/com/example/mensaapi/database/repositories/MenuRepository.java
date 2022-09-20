@@ -6,7 +6,15 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.List;
 
 public interface MenuRepository extends CrudRepository<Menu, Integer> {
-    Optional<Menu> findMenuByDateAndMeal(LocalDate data, Meal meal);
+
+    Optional<Menu> findByDateAndMeal(LocalDate data, Meal meal);
+
+    //Optional<Menu> findMenuByFoodProviderIdAndDate(int foodProviderId, LocalDate date);
+
+    Optional<List<Menu>> findByFoodProviderIdEqualsOrderByDate(int foodProviderId);
+
+    Optional<List<Menu>> findByFoodProviderIdEqualsAndDate(int foodProviderId, LocalDate date);
 }

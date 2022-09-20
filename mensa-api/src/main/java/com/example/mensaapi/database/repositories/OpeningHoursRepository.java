@@ -2,6 +2,7 @@ package com.example.mensaapi.database.repositories;
 
 import com.example.mensaapi.database.entities.OpeningHours;
 import org.springframework.data.repository.CrudRepository;
+import com.example.mensaapi.database.entities.FoodProvider;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -12,4 +13,6 @@ public interface OpeningHoursRepository extends CrudRepository<OpeningHours, Int
 
     @Transactional
     List<OpeningHours> deleteByFoodProviderId(Integer foodProviderId);
+
+    Optional<List<OpeningHours>> findByFoodProvider(FoodProvider foodProvider);
 }
