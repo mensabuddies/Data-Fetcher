@@ -66,7 +66,7 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
 
             // Get opening hours
             Elements opening = detail.getElementsByClass("opening");
-            op = constructOpeningHours(opening.get(0).getElementsByTag("tr"));
+            op = constructOpeningHours(opening.get(0).getElementsByTag("tr"), isCafeteria);
 
             // Get additional information (e.g. evening mensa)
             additional = (opening.get(0).getElementsByTag("p").text());
@@ -152,7 +152,7 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
         return 0;
     }
 
-    private List<FetchedOpeningHours> constructOpeningHours(Elements contentTableRows) {
+    private List<FetchedOpeningHours> constructOpeningHours(Elements contentTableRows, boolean isCafeteria) {
         List<FetchedOpeningHours> fetchedOpeningHoursList = new ArrayList<>();
         int weekdayCounter = 0;
         for (Element tableRow : contentTableRows) {
@@ -174,7 +174,7 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
                     boolean open = true;
                     String openingAt = "";
                     String closingAt = "";
-                    String getAMealTill;
+                    String getAMealTill = "";
 
                     if (hours.length > 0 && !hours[0].equals("geschlossen")) {
                         openingAt = (hours[0]);
@@ -182,7 +182,8 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
                     } else {
                         open = (false);
                     }
-                    getAMealTill = mealOutTill;
+                    if (!isCafeteria)
+                        getAMealTill = mealOutTill;
 
                     FetchedOpeningHours h = FetchedOpeningHours.createOpeningHours(
                             day,
