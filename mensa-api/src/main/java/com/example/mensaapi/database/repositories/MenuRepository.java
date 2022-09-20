@@ -17,4 +17,5 @@ public interface MenuRepository extends CrudRepository<Menu, Integer> {
     Optional<List<Menu>> findByFoodProviderIdEqualsOrderByDate(int foodProviderId);
 
     Optional<List<Menu>> findByFoodProviderIdEqualsAndDate(int foodProviderId, LocalDate date);
+    Optional<Menu> findMenuByDateAndMealAndFoodProviderId(LocalDate data, Meal meal, int foodProviderId);
 }
