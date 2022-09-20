@@ -7,5 +7,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.Set;
 
 public interface OpeningHoursRepository extends CrudRepository<OpeningHours, Integer> {
-    Set<OpeningHours> findOpeningHoursByCanteen(Canteen canteen);
+    Set<OpeningHours> findOpeningHoursByCanteen_Id(int id);
 }
