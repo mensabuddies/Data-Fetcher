@@ -16,9 +16,9 @@ public interface FetchedMeal {
         if (name == null || name.equals("")) {
             throw new IllegalArgumentException("Name cannot be empty!");
         }
-        if (priceStudent < 0 || priceEmployee < 0 || priceGuest < 0) {
-            throw new IllegalArgumentException("Price of Meal (\"" + name + "\") cannot be below 0!");
-        }
+        //if (priceStudent < 0 || priceEmployee < 0 || priceGuest < 0) {
+        //    throw new IllegalArgumentException("Price of Meal (\"" + name + "\") cannot be below 0!");
+       // }
         return new FetchedMealImplementation(name, priceStudent, priceEmployee, priceGuest, allergensRaw, ingredientsRaw);
     }
 }
