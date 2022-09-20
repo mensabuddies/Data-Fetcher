@@ -48,8 +48,8 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
             String nameElement = detail.getElementsByTag("h4").text();
             isCafeteria = nameElement.contains("Cafeteria");
             // Info text (e.g. mensa is closed) is directly after the mensa-name in a h4-Tag, seperated by hyphen or pipe
-            if (nameElement.contains(" - ")) {
-                String[] parts = nameElement.split(" - ");
+            if (nameElement.contains(" - ") || nameElement.contains(" – ")) {
+                String[] parts = nameElement.split(" - | – ");
                 name = parts[0];
                 headerInfo = parts[1];
             } else if (nameElement.contains(" | ")) {
