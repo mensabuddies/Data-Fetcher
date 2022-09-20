@@ -42,7 +42,8 @@ public class MealParser implements Parser<FetchedMeal> {
             priceEmployee = Integer.parseInt(priceElement.attr("data-bed").replace(",", ""));
             priceGuest = Integer.parseInt(priceElement.attr("data-guest").replace(",", ""));
         } catch (Exception e){
-            throw new IllegalStateException("Could not parse html!");
+            // ignore this case
+            //throw new IllegalStateException("Could not parse html!");
         }
 
         Elements allergensElements = Objects
