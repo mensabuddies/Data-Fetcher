@@ -21,9 +21,9 @@ public class Menu {
     private Integer id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "canteen_id")
+    @JoinColumn(name = "food_provider_id")
     @JsonBackReference
-    private Canteen canteen;
+    private FoodProvider foodProvider;
 
     @ManyToOne()
     @JoinColumn(name = "meal_id")
@@ -32,14 +32,14 @@ public class Menu {
 
     private LocalDate date;
 
-    public Menu(Canteen canteen, Meal meal, LocalDate date) {
-        this.canteen = canteen;
+    public Menu(FoodProvider foodProvider, Meal meal, LocalDate date) {
+        this.foodProvider = foodProvider;
         this.meal = meal;
         this.date = date;
     }
 
-    public Menu(Canteen canteen, LocalDate date){
-        this.canteen = canteen;
+    public Menu(FoodProvider foodProvider, LocalDate date) {
+        this.foodProvider = foodProvider;
         this.date = date;
     }
 }

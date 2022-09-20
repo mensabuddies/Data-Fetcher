@@ -17,6 +17,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class FoodProviderParser implements Parser<FetchedFoodProvider> {
+    // This is needed because not all cafeterias have the location name in them
+    public Optional<FetchedFoodProvider> parseWithLocation(Element fetched, Location location) {
+        Optional<FetchedFoodProvider> offp = parse(fetched);
+        return offp.map(ffp -> {
+            ffp.setLocation(location);
+            return ffp;
+        });
+    }
+
     /**
      * Expects an Element of class "mensa"
      *
@@ -28,7 +37,7 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
         Elements details = fetched.getElementsByClass("right");
         String name = "";
         String headerInfo = "";
-        Location location = Location.WÜRZBURG;
+        Location location = Location.WUERZBURG;
         String linkToFood = "";
         String additional = "";
         List<FetchedOpeningHours> op = new ArrayList<>();
@@ -104,8 +113,8 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
     }
 
     private Location getLocation(String nameElement) {
-        if (nameElement.contains(Location.WÜRZBURG.getValue()))
-            return Location.WÜRZBURG;
+        if (nameElement.contains(Location.WUERZBURG.getValue()))
+            return Location.WUERZBURG;
         if (nameElement.contains(Location.BAMBERG.getValue()))
             return Location.BAMBERG;
         if (nameElement.contains(Location.ASCHAFFENBURG.getValue()))
@@ -113,10 +122,10 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
         if (nameElement.contains(Location.SCHWEINFURT.getValue()))
             return Location.SCHWEINFURT;
 
-        return null;
+        return Location.INVALID;
     }
 
-    private int weekdayNameToInt(String shortName){
+    private int weekdayNameToInt(String shortName) {
         return switch (shortName) {
             case "Mo", "Montag" -> 1;
             case "Di", "Dienstag" -> 2;
@@ -130,7 +139,7 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
     }
 
     private int weekdaysToIteratorNumber(String weekdays) {
-        int day1, day2 = 0;
+        int day1, day2;
         if (weekdays.contains("-")) {
             String[] split = weekdays.split(" - ");
             day1 = weekdayNameToInt(split[0]);
@@ -153,7 +162,7 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
             if (tableRowItems.size() > 2) {
                 String[] hours = tableRowItems.get(1).text().split(" - | ");
                 String mealOutTill = "";
-                if(!tableRowItems.get(2).text().isEmpty()){
+                if (!tableRowItems.get(2).text().isEmpty()) {
                     mealOutTill = tableRowItems.get(2).text().split(" ")[2];
                 }
                 int numberOfLoopExecutions = weekdaysToIteratorNumber(tableRowItems.get(0).text());

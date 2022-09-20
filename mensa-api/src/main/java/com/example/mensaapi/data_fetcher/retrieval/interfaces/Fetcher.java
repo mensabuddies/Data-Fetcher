@@ -4,7 +4,6 @@ import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
 import com.example.mensaapi.data_fetcher.retrieval.JsoupFetcher;
 import org.jsoup.nodes.Document;
 
-import java.util.List;
 import java.util.Optional;
 
 /**

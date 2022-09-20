@@ -4,31 +4,29 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.Set;
+import java.util.List;
 
 @Entity
-@Table(name = "weekdays")
+@Table(name = "food_provider_types")
 @NoArgsConstructor
 @Getter
 @Setter
-public class Weekday {
+public class FoodProviderType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "weekday_id")
-    private int id;
+    @Column(name = "food_provider_type_id")
+    private Integer id;
 
     @Column(unique = true)
     private String name;
 
-    @ToString.Exclude
-    @OneToMany(mappedBy = "weekday", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "type", cascade = CascadeType.ALL)
     @JsonBackReference
-    private Set<OpeningHours> openingHours = new java.util.LinkedHashSet<>();
+    private List<FoodProvider> foodProviders;
 
-    public Weekday(String name) {
+    public FoodProviderType(String name) {
         this.name = name;
     }
 }

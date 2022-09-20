@@ -1,6 +1,6 @@
 package com.example.mensaapi.data_fetcher.dataclasses;
 
-import com.example.mensaapi.data_fetcher.dataclasses.enums.FoodProviderType;
+import com.example.mensaapi.data_fetcher.dataclasses.enums.FetchedFoodProviderType;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedFoodProvider;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedOpeningHours;
@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public class FetchedCanteen implements FetchedFoodProvider {
     private final String name;
-    private final Location location;
+    private Location location;
     private final String info;
     private final List<FetchedOpeningHours> fetchedOpeningHours;
     private final String additional;
@@ -79,8 +79,8 @@ public class FetchedCanteen implements FetchedFoodProvider {
     }
 
     @Override
-    public FoodProviderType getType() {
-        return FoodProviderType.CANTEEN;
+    public FetchedFoodProviderType getType() {
+        return FetchedFoodProviderType.CANTEEN;
     }
 
     @Override
@@ -94,5 +94,10 @@ public class FetchedCanteen implements FetchedFoodProvider {
                 ", linkToFoodPlan=" + linkToFoodPlan +
                 ", meals=" + menusPerFetchedDay +
                 "}\n";
+    }
+
+    @Override
+    public void setLocation(Location location) {
+        this.location = location;
     }
 }

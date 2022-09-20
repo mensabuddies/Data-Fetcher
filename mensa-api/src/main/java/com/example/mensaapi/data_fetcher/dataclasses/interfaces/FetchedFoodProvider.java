@@ -3,7 +3,7 @@ package com.example.mensaapi.data_fetcher.dataclasses.interfaces;
 import com.example.mensaapi.data_fetcher.dataclasses.FetchedCafeteria;
 import com.example.mensaapi.data_fetcher.dataclasses.FetchedCanteen;
 import com.example.mensaapi.data_fetcher.dataclasses.FetchedDay;
-import com.example.mensaapi.data_fetcher.dataclasses.enums.FoodProviderType;
+import com.example.mensaapi.data_fetcher.dataclasses.enums.FetchedFoodProviderType;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
 
 import java.time.LocalDate;
@@ -12,17 +12,24 @@ import java.util.Optional;
 
 public interface FetchedFoodProvider {
     String getName();
+
     Location getLocation();
+
     String getTitleInfo();
+
     List<FetchedOpeningHours> getOpeningHours();
+
     String getBodyInfo();
+
     String getLinkToFoodPlan();
 
     List<FetchedDay> getMenus();
 
     Optional<FetchedDay> getMenuOfDay(LocalDate date);
 
-    FoodProviderType getType();
+    FetchedFoodProviderType getType();
+
+    void setLocation(Location location);
 
     static FetchedFoodProvider createCanteen(
             String name,

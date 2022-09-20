@@ -7,13 +7,18 @@ import org.jsoup.nodes.Element;
 
 import java.util.Optional;
 
-public interface Parser<T>{
+public interface Parser<T> {
     Optional<T> parse(Element fetched);
 
     static MealParser createMealParser() {
         return new MealParser();
     }
-    static DayParser createDayParser() { return new DayParser(createMealParser()); }
 
-    static FoodProviderParser createFoodProviderParser() { return new FoodProviderParser(); }
+    static DayParser createDayParser() {
+        return new DayParser(createMealParser());
+    }
+
+    static FoodProviderParser createFoodProviderParser() {
+        return new FoodProviderParser();
+    }
 }

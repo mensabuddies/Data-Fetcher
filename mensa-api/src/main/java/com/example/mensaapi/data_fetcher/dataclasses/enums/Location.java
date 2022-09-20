@@ -1,10 +1,12 @@
 package com.example.mensaapi.data_fetcher.dataclasses.enums;
 
 public enum Location {
-    WÜRZBURG("Würzburg"),
+    WUERZBURG("Würzburg"),
     BAMBERG("Bamberg"),
     SCHWEINFURT("Schweinfurt"),
-    ASCHAFFENBURG("Aschaffenburg");
+    ASCHAFFENBURG("Aschaffenburg"),
+
+    INVALID("Invalid");
 
     private final String value;
 
@@ -12,7 +14,9 @@ public enum Location {
         value = newValue;
     }
 
-    public String getValue() { return value; }
+    public String getValue() {
+        return value;
+    }
 
     public String getValueFormatted() {
         return value

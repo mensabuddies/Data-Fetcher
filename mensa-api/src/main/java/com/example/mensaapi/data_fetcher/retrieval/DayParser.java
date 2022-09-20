@@ -20,8 +20,10 @@ public class DayParser implements Parser<FetchedDay> {
     public DayParser(MealParser mealParser) {
         this.mealParser = mealParser;
     }
+
     /**
      * Expects node of class "day"
+     *
      * @param fetched
      * @return
      */
@@ -51,7 +53,7 @@ public class DayParser implements Parser<FetchedDay> {
             menus = fetched.getElementsByClass("menu");
 
 
-            for (Element menu: menus) {
+            for (Element menu : menus) {
 
                 fetchedMealSet.add(mealParser.parse(menu).orElseThrow());
             }

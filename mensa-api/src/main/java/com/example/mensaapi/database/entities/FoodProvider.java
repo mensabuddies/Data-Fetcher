@@ -1,25 +1,23 @@
 package com.example.mensaapi.database.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "canteens")
+@Table(name = "food_providers")
 @NoArgsConstructor
 @Getter
 @Setter
-public class Canteen {
+public class FoodProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "canteen_id", unique = true)
+    @Column(name = "food_provider_id", unique = true)
     private Integer id;
 
     @Column(unique = true)
@@ -30,7 +28,7 @@ public class Canteen {
     @JsonManagedReference
     private Location location;
 
-    @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "foodProvider", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<OpeningHours> openingHours;
 
@@ -42,7 +40,12 @@ public class Canteen {
     @Column(name = "link_to_food_plan")
     private String linkToFoodPlan;
 
-    @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "foodProvider", cascade = CascadeType.ALL)
     @JsonManagedReference
     private Set<Menu> menus;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "food_provider_type_id", nullable = false)
+    @JsonManagedReference
+    private FoodProviderType type;
 }

@@ -1,12 +1,12 @@
 package com.example.mensaapi;
 
 import com.example.mensaapi.data_fetcher.dataclasses.FetchedData;
-import com.example.mensaapi.data_fetcher.retrieval.DataFetcher;
 import com.example.mensaapi.data_fetcher.dataclasses.FetchedDay;
+import com.example.mensaapi.data_fetcher.dataclasses.enums.FetchedFoodProviderType;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedFoodProvider;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedMeal;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedOpeningHours;
-import com.example.mensaapi.data_fetcher.retrieval.interfaces.Fetcher;
+import com.example.mensaapi.data_fetcher.retrieval.DataFetcher;
 import com.example.mensaapi.database.Util;
 import com.example.mensaapi.database.entities.*;
 import com.example.mensaapi.database.repositories.*;
@@ -32,7 +32,7 @@ public class MensaApiApplication {
     @Autowired
     LocationRepository locationRepository;
     @Autowired
-    CanteenRepository canteenRepository;
+    FoodProviderRepository foodProviderRepository;
     @Autowired
     MealRepository mealRepository;
     @Autowired
@@ -41,6 +41,9 @@ public class MensaApiApplication {
     @Autowired
     OpeningHoursRepository openingHoursRepository;
 
+    @Autowired
+    FoodProviderTypeRepository foodProviderTypeRepository;
+
     public static void main(String[] args) {
         SpringApplication.run(MensaApiApplication.class, args);
     }
@@ -48,10 +51,11 @@ public class MensaApiApplication {
     @Bean
     public CommandLineRunner run() {
         return (args -> {
-            if (!weekdayRepository.findById(1).isPresent()) {
+            if (weekdayRepository.findById(1).isEmpty()) {
                 Util u = new Util();
                 u.insertWeekdays(weekdayRepository);
                 u.insertLocations(locationRepository);
+                u.insertTypes(foodProviderTypeRepository);
             }
             /// For debugging
             //saveLatestData();
@@ -69,28 +73,28 @@ public class MensaApiApplication {
         Optional<FetchedData> fetchedData = new DataFetcher().fetchCurrentData();
 
         fetchedData.ifPresent(data -> {
-            for (FetchedFoodProvider fetchedCanteen : data.getFetchedCanteens()) {
+            for (FetchedFoodProvider fetchedFoodProvider : data.getFetchedFoodProviders()) {
                 // First, we store the canteen with its details (like opening hours, etc.)
-                Canteen canteen = storeCanteen(fetchedCanteen);
+                FoodProvider foodProvider = storeFoodProvider(fetchedFoodProvider);
 
-                // Then, we store the meals
-                for (FetchedDay mealsForTheDay : fetchedCanteen.getMenus()) {
-                    for (FetchedMeal fetchedMeal : mealsForTheDay.getMeals()) {
-                        Meal meal = storeMeal(fetchedMeal);
-                        // Create and save new menu if it does not exist already
-                        menuRepository.findMenuByDateAndMeal(mealsForTheDay.getDate(), meal).ifPresentOrElse(
-                                /* if present: */ menu1 -> System.out.println("Duplicate menu found!"),
-                                /* or else: */() -> menuRepository.save(new Menu(canteen, meal, mealsForTheDay.getDate()))
-                        );
+                if (fetchedFoodProvider.getType() == FetchedFoodProviderType.CANTEEN) {
+                    // Then, we store the meals
+                    for (FetchedDay mealsForTheDay : fetchedFoodProvider.getMenus()) {
+                        for (FetchedMeal fetchedMeal : mealsForTheDay.getMeals()) {
+                            Meal meal = storeMeal(fetchedMeal);
+                            // Create and save new menu if it does not exist already
+                            menuRepository.findMenuByDateAndMeal(mealsForTheDay.getDate(), meal).ifPresentOrElse(
+                                    /* if present: */ menu1 -> System.out.println("Duplicate menu found!"),
+                                    /* or else: */() -> menuRepository.save(new Menu(foodProvider, meal, mealsForTheDay.getDate()))
+                            );
+                        }
                     }
                 }
-            }
-            for (FetchedFoodProvider fetchedCafeteria : data.getFetchedCafeterias()) {
-
             }
         });
 
     }
+
 
     private Meal storeMeal(FetchedMeal fetchedMeal) {
         Meal meal = new Meal(
@@ -125,16 +129,17 @@ public class MensaApiApplication {
         return mealRepository.save(meal);
     }
 
-    private Canteen storeCanteen(FetchedFoodProvider fetchedFoodProvider) {
-        Canteen canteen = canteenRepository.getCanteenByName(fetchedFoodProvider.getName()).orElse(new Canteen());
+    private FoodProvider storeFoodProvider(FetchedFoodProvider fetchedFoodProvider) {
+        FoodProvider foodProvider = foodProviderRepository.getFoodProviderByName(fetchedFoodProvider.getName()).orElse(new FoodProvider());
 
-        canteen.setName(fetchedFoodProvider.getName());
-        canteen.setLocation(locationRepository.getLocationByName(fetchedFoodProvider.getLocation().getValue()));
-        canteen.setInfo(fetchedFoodProvider.getTitleInfo());
-        canteen.setAdditionalInfo(fetchedFoodProvider.getBodyInfo());
-        canteen.setLinkToFoodPlan(fetchedFoodProvider.getLinkToFoodPlan());
+        foodProvider.setName(fetchedFoodProvider.getName());
+        foodProvider.setLocation(locationRepository.getLocationByName(fetchedFoodProvider.getLocation().getValue()));
+        foodProvider.setInfo(fetchedFoodProvider.getTitleInfo());
+        foodProvider.setAdditionalInfo(fetchedFoodProvider.getBodyInfo());
+        foodProvider.setLinkToFoodPlan(fetchedFoodProvider.getLinkToFoodPlan());
+        foodProvider.setType(foodProviderTypeRepository.findByName(fetchedFoodProvider.getType().getValue()));
 
-        List<OpeningHours> openingHours = openingHoursRepository.findByCanteenIdEqualsOrderByWeekday(canteen.getId()).orElse(new ArrayList<>());
+        List<OpeningHours> openingHours = openingHoursRepository.findByFoodProviderIdEqualsOrderByWeekday(foodProvider.getId()).orElse(new ArrayList<>());
 
         if (!openingHours.isEmpty()) {
             // Go through all fetchedOpeningHours (foh) and check if saved openingHours (oh) are up-to-date
@@ -144,8 +149,7 @@ public class MensaApiApplication {
                 updateOrInsertOpeningHours(
                         foh,
                         openingHours,
-                        fetchedFoodProvider,
-                        canteen
+                        foodProvider
                 );
 
             }
@@ -153,7 +157,7 @@ public class MensaApiApplication {
             // If no openingHours were found, just insert them - no updating necessary
             for (FetchedOpeningHours foh : fetchedFoodProvider.getOpeningHours()) {
                 openingHours.add(new OpeningHours(
-                        canteen,
+                        foodProvider,
                         dayOfWeekToWeekday(foh.getWeekday()),
                         foh.isOpen(),
                         foh.getOpeningAt(),
@@ -165,18 +169,18 @@ public class MensaApiApplication {
         }
 
 
-        canteen.setOpeningHours(openingHours);
+        foodProvider.setOpeningHours(openingHours);
 
-        canteenRepository.save(canteen);
+        foodProviderRepository.save(foodProvider);
 
-        return canteen;
+        return foodProvider;
     }
+
 
     private void updateOrInsertOpeningHours(
             FetchedOpeningHours foh,
             List<OpeningHours> openingHours,
-            FetchedFoodProvider fetchedFoodProvider,
-            Canteen canteen
+            FoodProvider foodProvider
     ) {
         // go through saved openingHours
         for (int j = 0; j < openingHours.size(); j++) {
@@ -208,7 +212,7 @@ public class MensaApiApplication {
             if (j == openingHours.size() - 1) {
                 // We only land here if the corresponding openingHour was not found, so insert it
                 openingHours.add(new OpeningHours(
-                        canteen,
+                        foodProvider,
                         dayOfWeekToWeekday(foh.getWeekday()),
                         foh.isOpen(),
                         foh.getOpeningAt(),
