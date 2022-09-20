@@ -1,10 +1,12 @@
 package com.example.mensaapi;
 
-import com.example.mensaapi.data_fetcher.DataFetcher;
+import com.example.mensaapi.data_fetcher.dataclasses.FetchedData;
+import com.example.mensaapi.data_fetcher.retrieval.DataFetcher;
 import com.example.mensaapi.data_fetcher.dataclasses.FetchedDay;
-import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedCanteen;
+import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedFoodProvider;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedMeal;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedOpeningHours;
+import com.example.mensaapi.data_fetcher.retrieval.interfaces.Fetcher;
 import com.example.mensaapi.database.Util;
 import com.example.mensaapi.database.entities.*;
 import com.example.mensaapi.database.repositories.*;
@@ -20,6 +22,7 @@ import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @SpringBootApplication
 public class MensaApiApplication {
@@ -63,24 +66,30 @@ public class MensaApiApplication {
     @Scheduled(cron = "0 0 0 * * *") // Täglich um 0 Uhr
     @Scheduled(fixedDelay = 10000)
     private void storeStudentenwerkDataInDatabase() {
-        List<FetchedCanteen> fetchedCanteens = new DataFetcher().get();
+        Optional<FetchedData> fetchedData = new DataFetcher().fetchCurrentData();
 
-        for (FetchedCanteen fetchedCanteen : fetchedCanteens) {
-            // First, we store the canteen with its details (like opening hours, etc.)
-            Canteen canteen = storeCanteen(fetchedCanteen);
+        fetchedData.ifPresent(data -> {
+            for (FetchedFoodProvider fetchedCanteen : data.getFetchedCanteens()) {
+                // First, we store the canteen with its details (like opening hours, etc.)
+                Canteen canteen = storeCanteen(fetchedCanteen);
 
-            // Then, we store the meals
-            for (FetchedDay mealsForTheDay : fetchedCanteen.getMenus()) {
-                for (FetchedMeal fetchedMeal : mealsForTheDay.getMeals()) {
-                    Meal meal = storeMeal(fetchedMeal);
-                    // Create and save new menu if it does not exist already
-                    menuRepository.findMenuByDateAndMeal(mealsForTheDay.getDate(), meal).ifPresentOrElse(
-                            /* if present: */ menu1 -> System.out.println("Duplicate menu found!"),
-                            /* or else: */() -> menuRepository.save(new Menu(canteen, meal, mealsForTheDay.getDate()))
-                    );
+                // Then, we store the meals
+                for (FetchedDay mealsForTheDay : fetchedCanteen.getMenus()) {
+                    for (FetchedMeal fetchedMeal : mealsForTheDay.getMeals()) {
+                        Meal meal = storeMeal(fetchedMeal);
+                        // Create and save new menu if it does not exist already
+                        menuRepository.findMenuByDateAndMeal(mealsForTheDay.getDate(), meal).ifPresentOrElse(
+                                /* if present: */ menu1 -> System.out.println("Duplicate menu found!"),
+                                /* or else: */() -> menuRepository.save(new Menu(canteen, meal, mealsForTheDay.getDate()))
+                        );
+                    }
                 }
             }
-        }
+            for (FetchedFoodProvider fetchedCafeteria : data.getFetchedCafeterias()) {
+
+            }
+        });
+
     }
 
     private Meal storeMeal(FetchedMeal fetchedMeal) {
@@ -116,33 +125,33 @@ public class MensaApiApplication {
         return mealRepository.save(meal);
     }
 
-    private Canteen storeCanteen(FetchedCanteen fetchedCanteen) {
-        Canteen canteen = canteenRepository.getCanteenByName(fetchedCanteen.getName()).orElse(new Canteen());
+    private Canteen storeCanteen(FetchedFoodProvider fetchedFoodProvider) {
+        Canteen canteen = canteenRepository.getCanteenByName(fetchedFoodProvider.getName()).orElse(new Canteen());
 
-        canteen.setName(fetchedCanteen.getName());
-        canteen.setLocation(locationRepository.getLocationByName(fetchedCanteen.getLocation().getValue()));
-        canteen.setInfo(fetchedCanteen.getTitleInfo());
-        canteen.setAdditionalInfo(fetchedCanteen.getBodyInfo());
-        canteen.setLinkToFoodPlan(fetchedCanteen.getLinkToFoodPlan());
+        canteen.setName(fetchedFoodProvider.getName());
+        canteen.setLocation(locationRepository.getLocationByName(fetchedFoodProvider.getLocation().getValue()));
+        canteen.setInfo(fetchedFoodProvider.getTitleInfo());
+        canteen.setAdditionalInfo(fetchedFoodProvider.getBodyInfo());
+        canteen.setLinkToFoodPlan(fetchedFoodProvider.getLinkToFoodPlan());
 
         List<OpeningHours> openingHours = openingHoursRepository.findByCanteenIdEqualsOrderByWeekday(canteen.getId()).orElse(new ArrayList<>());
 
         if (!openingHours.isEmpty()) {
             // Go through all fetchedOpeningHours (foh) and check if saved openingHours (oh) are up-to-date
-            for (int i = 0; i < fetchedCanteen.getOpeningHours().size(); i++) {
-                var foh = fetchedCanteen.getOpeningHours().get(i);
+            for (int i = 0; i < fetchedFoodProvider.getOpeningHours().size(); i++) {
+                var foh = fetchedFoodProvider.getOpeningHours().get(i);
 
                 updateOrInsertOpeningHours(
                         foh,
                         openingHours,
-                        fetchedCanteen,
+                        fetchedFoodProvider,
                         canteen
                 );
 
             }
         } else {
             // If no openingHours were found, just insert them - no updating necessary
-            for (FetchedOpeningHours foh : fetchedCanteen.getOpeningHours()) {
+            for (FetchedOpeningHours foh : fetchedFoodProvider.getOpeningHours()) {
                 openingHours.add(new OpeningHours(
                         canteen,
                         dayOfWeekToWeekday(foh.getWeekday()),
@@ -166,7 +175,7 @@ public class MensaApiApplication {
     private void updateOrInsertOpeningHours(
             FetchedOpeningHours foh,
             List<OpeningHours> openingHours,
-            FetchedCanteen fetchedCanteen,
+            FetchedFoodProvider fetchedFoodProvider,
             Canteen canteen
     ) {
         // go through saved openingHours

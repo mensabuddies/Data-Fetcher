@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
 
-public class JsoupFetcher implements Fetcher {
+public class JsoupFetcher implements Fetcher<Document> {
     private final String url;
 
     public JsoupFetcher(String url) {

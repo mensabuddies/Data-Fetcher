@@ -1,14 +1,15 @@
 package com.example.mensaapi.data_fetcher.dataclasses;
 
+import com.example.mensaapi.data_fetcher.dataclasses.enums.FoodProviderType;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
-import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedCanteen;
+import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedFoodProvider;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedOpeningHours;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public class FetchedCanteenImplementation implements FetchedCanteen {
+public class FetchedCanteen implements FetchedFoodProvider {
     private final String name;
     private final Location location;
     private final String info;
@@ -19,7 +20,7 @@ public class FetchedCanteenImplementation implements FetchedCanteen {
 
     private final List<FetchedDay> menusPerFetchedDay;
 
-    public FetchedCanteenImplementation(
+    public FetchedCanteen(
             String name,
             Location location,
             String info,
@@ -75,6 +76,11 @@ public class FetchedCanteenImplementation implements FetchedCanteen {
     @Override
     public Optional<FetchedDay> getMenuOfDay(LocalDate date) {
         return menusPerFetchedDay.stream().filter(menu -> menu.getDate().equals(date)).findFirst();
+    }
+
+    @Override
+    public FoodProviderType getType() {
+        return FoodProviderType.CANTEEN;
     }
 
     @Override

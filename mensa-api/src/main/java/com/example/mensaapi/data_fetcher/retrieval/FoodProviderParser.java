@@ -2,7 +2,7 @@ package com.example.mensaapi.data_fetcher.retrieval;
 
 import com.example.mensaapi.data_fetcher.dataclasses.FetchedDay;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
-import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedCanteen;
+import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedFoodProvider;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedOpeningHours;
 import com.example.mensaapi.data_fetcher.retrieval.interfaces.Fetcher;
 import com.example.mensaapi.data_fetcher.retrieval.interfaces.Parser;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class CanteenParser implements Parser<FetchedCanteen> {
+public class FoodProviderParser implements Parser<FetchedFoodProvider> {
     /**
      * Expects an Element of class "mensa"
      *
@@ -24,7 +24,7 @@ public class CanteenParser implements Parser<FetchedCanteen> {
      * @return
      */
     @Override
-    public Optional<FetchedCanteen> parse(Element fetched) {
+    public Optional<FetchedFoodProvider> parse(Element fetched) {
         Elements details = fetched.getElementsByClass("right");
         String name = "";
         String headerInfo = "";
@@ -32,11 +32,12 @@ public class CanteenParser implements Parser<FetchedCanteen> {
         String linkToFood = "";
         String additional = "";
         List<FetchedOpeningHours> op = new ArrayList<>();
-
+        boolean isCafeteria = false;
 
         for (Element detail : details) {
             // Get Name
             String nameElement = detail.getElementsByTag("h4").text();
+            isCafeteria = nameElement.contains("Cafeteria");
             // Info text (e.g. mensa is closed) is directly after the mensa-name in a h4-Tag, seperated by hyphen or pipe
             if (nameElement.contains(" - ")) {
                 String[] parts = nameElement.split(" - ");
@@ -62,30 +63,44 @@ public class CanteenParser implements Parser<FetchedCanteen> {
             additional = (opening.get(0).getElementsByTag("p").text());
 
             // Get Link
-            linkToFood = ("https://www.studentenwerk-wuerzburg.de" + detail.getElementsByClass("fi").attr("href"));
+            if (!isCafeteria)
+                linkToFood = ("https://www.studentenwerk-wuerzburg.de" + detail.getElementsByClass("fi").attr("href"));
         }
 
-        Optional<Document> menuOfCanteen = Fetcher.createJSOUPFetcher(linkToFood).fetchCurrentData();
-
         List<FetchedDay> menus = new ArrayList<>();
-        Parser<FetchedDay> dayParser = Parser.createDayParser();
 
-        menuOfCanteen.ifPresent(document -> {
-            Elements days = document.getElementsByClass("day").stream().filter(dayElement -> dayElement.tagName().equals("div")).collect(Collectors.toCollection(Elements::new));
-            for (Element day: days) {
-                menus.add(dayParser.parse(day).orElseThrow());
-            }
-        });
+        if (!isCafeteria) {
+            Optional<Document> menuOfCanteen = Fetcher.createJsoupFetcher(linkToFood).fetchCurrentData();
 
-        return Optional.of(FetchedCanteen.createCanteen(
-                name,
-                location,
-                headerInfo,
-                op,
-                additional,
-                linkToFood,
-                menus
-        ));
+
+            Parser<FetchedDay> dayParser = Parser.createDayParser();
+
+            menuOfCanteen.ifPresent(document -> {
+                Elements days = document.getElementsByClass("day").stream().filter(dayElement -> dayElement.tagName().equals("div")).collect(Collectors.toCollection(Elements::new));
+                for (Element day : days) {
+                    menus.add(dayParser.parse(day).orElseThrow());
+                }
+            });
+        }
+        if (isCafeteria) {
+            return Optional.of(FetchedFoodProvider.createCafeteria(
+                    name,
+                    location,
+                    headerInfo,
+                    op,
+                    additional
+            ));
+        } else {
+            return Optional.of(FetchedFoodProvider.createCanteen(
+                    name,
+                    location,
+                    headerInfo,
+                    op,
+                    additional,
+                    linkToFood,
+                    menus
+            ));
+        }
     }
 
     private Location getLocation(String nameElement) {
@@ -103,20 +118,20 @@ public class CanteenParser implements Parser<FetchedCanteen> {
 
     private int weekdayNameToInt(String shortName){
         return switch (shortName) {
-            case "Mo" -> 1;
-            case "Di" -> 2;
-            case "Mi" -> 3;
-            case "Do" -> 4;
-            case "Fr" -> 5;
-            case "Sa" -> 6;
-            case "So" -> 7;
+            case "Mo", "Montag" -> 1;
+            case "Di", "Dienstag" -> 2;
+            case "Mi", "Mittwoch" -> 3;
+            case "Do", "Donnerstag" -> 4;
+            case "Fr", "Freitag" -> 5;
+            case "Sa", "Samstag" -> 6;
+            case "So", "Sonntag" -> 7;
             default -> 0;
         };
     }
 
     private int weekdaysToIteratorNumber(String weekdays) {
         int day1, day2 = 0;
-        if (weekdays.length() > 2) {
+        if (weekdays.contains("-")) {
             String[] split = weekdays.split(" - ");
             day1 = weekdayNameToInt(split[0]);
             day2 = weekdayNameToInt(split[1]);
@@ -176,4 +191,3 @@ public class CanteenParser implements Parser<FetchedCanteen> {
         return fetchedOpeningHoursList;
     }
 }
-

@@ -13,4 +13,13 @@ public enum Location {
     }
 
     public String getValue() { return value; }
+
+    public String getValueFormatted() {
+        return value
+                .toLowerCase()
+                .replace("ä", "ae")
+                .replace("ö", "oe")
+                .replace("ü", "ue")
+                .replace("ß", "ss");
+    }
 }
