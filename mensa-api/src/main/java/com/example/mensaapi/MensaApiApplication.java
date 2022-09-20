@@ -60,7 +60,7 @@ public class MensaApiApplication {
         storeStudentenwerkDataInDatabase();
     }
 
-    //@Scheduled(cron = "0 0 0 * * *") // Täglich um 0 Uhr
+    @Scheduled(cron = "0 0 0 * * *") // Täglich um 0 Uhr
     @Scheduled(fixedDelay = 10000)
     private void storeStudentenwerkDataInDatabase() {
         List<FetchedCanteen> fetchedCanteens = new DataFetcher().get();
@@ -73,7 +73,11 @@ public class MensaApiApplication {
             for (FetchedDay mealsForTheDay : fetchedCanteen.getMenus()) {
                 for (FetchedMeal fetchedMeal : mealsForTheDay.getMeals()) {
                     Meal meal = storeMeal(fetchedMeal);
-                    menuRepository.save(new Menu(canteen, meal, mealsForTheDay.getDate()));
+                    // Create and save new menu if it does not exist already
+                    menuRepository.findMenuByDateAndMeal(mealsForTheDay.getDate(), meal).ifPresentOrElse(
+                            /* if present: */ menu1 -> System.out.println("Duplicate menu found!"),
+                            /* or else: */() -> menuRepository.save(new Menu(canteen, meal, mealsForTheDay.getDate()))
+                    );
                 }
             }
         }
@@ -120,17 +124,16 @@ public class MensaApiApplication {
         canteen.setInfo(fetchedCanteen.getTitleInfo());
         canteen.setAdditionalInfo(fetchedCanteen.getBodyInfo());
         canteen.setLinkToFoodPlan(fetchedCanteen.getLinkToFoodPlan());
-        //canteenRepository.save(canteen);
 
-        //openingHoursRepository.deleteByCanteenId(canteen.getId());
         List<OpeningHours> openingHours = openingHoursRepository.findByCanteenIdEqualsOrderByWeekday(canteen.getId()).orElse(new ArrayList<>());
 
         if (!openingHours.isEmpty()) {
-            for (int i = 0; i < openingHours.size(); i++) {
-                var oh = openingHours.get(i);
+            // Go through all fetchedOpeningHours (foh) and check if saved openingHours (oh) are up-to-date
+            for (int i = 0; i < fetchedCanteen.getOpeningHours().size(); i++) {
+                var foh = fetchedCanteen.getOpeningHours().get(i);
 
                 updateOrInsertOpeningHours(
-                        oh,
+                        foh,
                         openingHours,
                         fetchedCanteen,
                         canteen
@@ -138,6 +141,7 @@ public class MensaApiApplication {
 
             }
         } else {
+            // If no openingHours were found, just insert them - no updating necessary
             for (FetchedOpeningHours foh : fetchedCanteen.getOpeningHours()) {
                 openingHours.add(new OpeningHours(
                         canteen,
@@ -159,29 +163,41 @@ public class MensaApiApplication {
         return canteen;
     }
 
-    private void updateOrInsertOpeningHours(OpeningHours oh, List<OpeningHours> openingHours, FetchedCanteen fetchedCanteen, Canteen canteen) {
-        for (int j = 0; j < fetchedCanteen.getOpeningHours().size(); j++) {
-            var foh = fetchedCanteen.getOpeningHours().get(j);
+    private void updateOrInsertOpeningHours(
+            FetchedOpeningHours foh,
+            List<OpeningHours> openingHours,
+            FetchedCanteen fetchedCanteen,
+            Canteen canteen
+    ) {
+        // go through saved openingHours
+        for (int j = 0; j < openingHours.size(); j++) {
+            var oh = openingHours.get(j);
 
-            if (oh.getWeekday().getName().equalsIgnoreCase(foh.getWeekday().getDisplayName(TextStyle.FULL, Locale.GERMAN))) {
+            // and try to find the corresponding openingHour (oh) to the fetchedOpeningHour (foh)
+            if (oh.getWeekday().getName().equalsIgnoreCase(foh.getWeekday()
+                    .getDisplayName(TextStyle.FULL, Locale.GERMAN))) {
+
+                // Now check if hours for that day are still up-to-date
                 if (oh.isOpened() != foh.isOpen() ||
                         !oh.getOpensAt().equals(foh.getOpeningAt()) ||
                         !oh.getClosesAt().equals(foh.getClosingAt()) ||
                         !oh.getGetFoodTill().equals(foh.getGetAMealTill())) {
 
-                    //iterator.remove();
-                    //openingHours.remove(oh);
+                    // If not update entry
                     oh.setOpened(foh.isOpen());
                     oh.setWeekday(dayOfWeekToWeekday(foh.getWeekday()));
                     oh.setOpensAt(foh.getOpeningAt());
                     oh.setClosesAt(foh.getClosingAt());
                     oh.setGetFoodTill(foh.getGetAMealTill());
-
                 }
-                return; // Break loop
+
+                // If we found the corresponding foh we can bail out
+                return;
             }
-            if (j == fetchedCanteen.getOpeningHours().size() - 1) {
-                // If last element, then insert data
+
+            // Check if this is the last iteration
+            if (j == openingHours.size() - 1) {
+                // We only land here if the corresponding openingHour was not found, so insert it
                 openingHours.add(new OpeningHours(
                         canteen,
                         dayOfWeekToWeekday(foh.getWeekday()),
@@ -190,6 +206,9 @@ public class MensaApiApplication {
                         foh.getClosingAt(),
                         foh.getGetAMealTill()
                 ));
+
+                // and then bail out directly
+                return;
             }
         }
 
