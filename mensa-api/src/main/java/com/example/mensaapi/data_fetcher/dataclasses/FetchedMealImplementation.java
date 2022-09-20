@@ -16,7 +16,7 @@ public class FetchedMealImplementation implements FetchedMeal {
         this.name = name;
         this.priceStudent = priceStudent;
         this.priceEmployee = priceEmployee;
-        this.priceGuest = priceEmployee;
+        this.priceGuest = priceGuest;
         this.allergensRaw = allergensRaw;
         this.ingredientsRaw = ingredientsRaw;
     }
