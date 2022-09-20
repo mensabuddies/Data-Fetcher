@@ -45,11 +45,35 @@ public class UserController {
         }
     }
 
+    @GetMapping(value = "/cafeterias")
+    public ResponseEntity<Object> getCafeterias() {
+        try {
+            List<FoodProvider> foodProviders = new ArrayList<>();
+
+            foodProviderRepository.getFoodProvidersByType(foodProviderTypeRepository.findByName(FetchedFoodProviderType.CAFETERIA.getValue()))
+                    .orElseThrow().iterator().forEachRemaining(foodProviders::add);
+
+            return ResponseHandler.generateResponse("Test", HttpStatus.OK, foodProviders);
+        } catch (Exception e) {
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
     @GetMapping(value = "/canteens/{id}")
     public ResponseEntity<Object> getCanteen(@PathVariable int id) {
         FoodProvider c = foodProviderRepository.findById(id).orElse(null);
 
-        if (c != null)
+        if (c != null && c.getType().getName().equals(FetchedFoodProviderType.CANTEEN.getValue()))
+            return ResponseHandler.generateResponse("Test", HttpStatus.OK, c);
+        else
+            return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
+    }
+
+    @GetMapping(value = "/cafeteria/{id}")
+    public ResponseEntity<Object> getCafeteria(@PathVariable int id) {
+        FoodProvider c = foodProviderRepository.findById(id).orElse(null);
+
+        if (c != null && c.getType().getName().equals(FetchedFoodProviderType.CAFETERIA.getValue()))
             return ResponseHandler.generateResponse("Test", HttpStatus.OK, c);
         else
             return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
@@ -59,7 +83,17 @@ public class UserController {
     public ResponseEntity<Object> getOpeningHours(@PathVariable int id) {
         FoodProvider c = foodProviderRepository.findById(id).orElse(null);
 
-        if (c != null)
+        if (c != null && c.getType().getName().equals(FetchedFoodProviderType.CANTEEN.getValue()))
+            return ResponseHandler.generateResponse("Test", HttpStatus.OK, c.getOpeningHours());
+        else
+            return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
+    }
+
+    @GetMapping(value = "/cafeteria/{id}/openinghours")
+    public ResponseEntity<Object> getOpeningHoursCafe(@PathVariable int id) {
+        FoodProvider c = foodProviderRepository.findById(id).orElse(null);
+
+        if (c != null && c.getType().getName().equals(FetchedFoodProviderType.CAFETERIA.getValue()))
             return ResponseHandler.generateResponse("Test", HttpStatus.OK, c.getOpeningHours());
         else
             return ResponseHandler.generateResponse("Canteen not found", HttpStatus.NOT_FOUND, null);
