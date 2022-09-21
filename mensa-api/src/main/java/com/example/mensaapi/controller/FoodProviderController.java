@@ -24,6 +24,7 @@ import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @RestController
 public class FoodProviderController {
@@ -124,6 +125,36 @@ public class FoodProviderController {
             for (Menu menu : menus) {
                 dates.add(menu.getDate());
             }
+
+            JSONArray jA = new JSONArray();
+            for (LocalDate date : dates) {
+                List<Menu> menusForToday = menuRepository.findByFoodProviderIdEqualsAndDate(id, date).orElse(new ArrayList<>());
+                jA.add(constructMenuJsonObject(menusForToday, date));
+            }
+            Collections.reverse(jA);
+
+            re.set(ResponseHandler.generateResponse(HttpStatus.OK, jA));
+        }, () -> {
+            re.set(ResponseHandler.generateResponse(
+                    "Canteen not found",
+                    HttpStatus.NOT_FOUND,
+                    null)
+            );
+        });
+
+        return re.get();
+    }
+
+    @GetMapping(value = "/canteens/{id}/menus/today_and_beyond")
+    public ResponseEntity<Object> getMenusOfCanteenStartingFromToday(@PathVariable int id) {
+        AtomicReference<ResponseEntity<Object>> re = new AtomicReference<>();
+
+        menuRepository.findByFoodProviderIdEqualsOrderByDate(id).ifPresentOrElse(menus -> {
+            Set<LocalDate> dates = new HashSet<>();
+            menus.stream()
+                    .filter(menu -> menu.getDate().compareTo(LocalDate.now()) >= 0)
+                    .map(menu -> dates.add(menu.getDate()))
+                    .collect(Collectors.toList());
 
             JSONArray jA = new JSONArray();
             for (LocalDate date : dates) {
