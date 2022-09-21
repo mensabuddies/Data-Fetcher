@@ -234,6 +234,8 @@ public class FoodProviderController {
         jO.put("info", canteen.getInfo());
         jO.put("additionalInfo", canteen.getAdditionalInfo());
         jO.put("linkToFoodPlan", canteen.getLinkToFoodPlan());
+        jO.put("foodProviderType", canteen.getType().getName());
+
 
         return jO;
     }
