@@ -55,6 +55,26 @@ public class FoodProviderController {
         }
     }
 
+    @GetMapping(value = "/food_providers")
+    public ResponseEntity<Object> getFoodProviders() {
+        try {
+            List<FoodProvider> foodProviders = new ArrayList<>();
+
+            foodProviderRepository.findAll().iterator().forEachRemaining(foodProviders::add);
+            JSONArray foodProvidersArray = new JSONArray();
+            for (FoodProvider currentFoodProvider : foodProviders) {
+                foodProvidersArray.add(constructCanteenJsonObject(currentFoodProvider));
+            }
+            return ResponseHandler.generateResponse("Test", HttpStatus.OK, foodProvidersArray);
+        } catch (Exception e) {
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+
+
+
+
     @GetMapping(value = "/cafeteria/{id}")
     public ResponseEntity<Object> getCafeteria(@PathVariable int id) {
         FoodProvider c = foodProviderRepository.findById(id).orElse(null);
