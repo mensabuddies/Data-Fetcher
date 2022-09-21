@@ -41,12 +41,15 @@ public class FoodProviderController {
     @GetMapping(value = "/cafeterias")
     public ResponseEntity<Object> getCafeterias() {
         try {
-            List<FoodProvider> foodProviders = new ArrayList<>();
+            List<FoodProvider> cafeterias = new ArrayList<>();
 
             foodProviderRepository.getFoodProvidersByType(foodProviderTypeRepository.findByName(FetchedFoodProviderType.CAFETERIA.getValue()))
-                    .orElseThrow().iterator().forEachRemaining(foodProviders::add);
-
-            return ResponseHandler.generateResponse("Test", HttpStatus.OK, foodProviders);
+                    .orElseThrow().iterator().forEachRemaining(cafeterias::add);
+            JSONArray cafeteriasArray = new JSONArray();
+            for (FoodProvider currentCafeteria : cafeterias) {
+                cafeteriasArray.add(constructCanteenJsonObject(currentCafeteria));
+            }
+            return ResponseHandler.generateResponse("Test", HttpStatus.OK, cafeteriasArray);
         } catch (Exception e) {
             return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
@@ -73,7 +76,7 @@ public class FoodProviderController {
     }
 
     @GetMapping(value = "/canteens")
-    public JSONArray getCanteens() {
+    public ResponseEntity<Object> getCanteens() {
         List<FoodProvider> canteens =
                 foodProviderRepository.getFoodProvidersByType(
                         foodProviderTypeRepository.findByName(FetchedFoodProviderType.CANTEEN.getValue())
@@ -83,7 +86,7 @@ public class FoodProviderController {
         for (FoodProvider currentCanteen : canteens) {
             canteensArray.add(constructCanteenJsonObject(currentCanteen));
         }
-        return canteensArray;
+        return ResponseHandler.generateResponse(HttpStatus.OK, canteensArray);
     }
 
     @GetMapping(value = "/canteens/{id}")

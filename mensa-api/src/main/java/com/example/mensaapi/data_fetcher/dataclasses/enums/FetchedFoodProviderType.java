@@ -1,8 +1,8 @@
 package com.example.mensaapi.data_fetcher.dataclasses.enums;
 
 public enum FetchedFoodProviderType {
-    CANTEEN("Cafeteria"),
-    CAFETERIA("Canteen");
+    CANTEEN("Canteen"),
+    CAFETERIA("Cafeteria");
 
     private final String value;
 
