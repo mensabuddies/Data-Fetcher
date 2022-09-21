@@ -68,7 +68,7 @@ public class MensaApiApplication {
     }
 
     @Scheduled(cron = "0 0 0 * * *") // Täglich um 0 Uhr
-    @Scheduled(fixedDelay = 10000)
+    //@Scheduled(fixedDelay = 10000)
     private void storeStudentenwerkDataInDatabase() {
         Optional<FetchedData> fetchedData = new DataFetcher().fetchCurrentData();
 
