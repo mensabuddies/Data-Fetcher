@@ -226,7 +226,8 @@ public class FoodProviderController {
         }
 
         JSONObject jO = new JSONObject();
-        jO.put(date, jA);
+        jO.put("date", date);
+        jO.put("meals", jA);
         return jO;
     }
 
