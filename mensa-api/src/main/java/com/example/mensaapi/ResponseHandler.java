@@ -16,11 +16,18 @@ public class ResponseHandler {
         return new ResponseEntity<>(map,status);
     }
 
-    public static ResponseEntity<Object> generateResponse(HttpStatus status, Object responseObj) {
+    public static ResponseEntity<Object> generateResponseWithoutMessage(HttpStatus status, Object responseObj) {
         Map<String, Object> map = new HashMap<>();
-        map.put("message", "");
         map.put("status", status.value());
         map.put("data", responseObj);
+
+        return new ResponseEntity<>(map,status);
+    }
+
+    public static ResponseEntity<Object> generateError(HttpStatus status, String message) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("message", message);
+        map.put("status", status.value());
 
         return new ResponseEntity<>(map,status);
     }
