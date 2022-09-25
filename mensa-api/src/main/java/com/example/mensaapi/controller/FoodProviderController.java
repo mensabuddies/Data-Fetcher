@@ -35,7 +35,7 @@ public class FoodProviderController {
     FoodProviderTypeRepository foodProviderTypeRepository;
 
     /**
-     * Returns all food providers
+     * Get all food providers.
      * @return
      */
     @GetMapping(value = "")
@@ -55,7 +55,7 @@ public class FoodProviderController {
     }
 
     /**
-     * Returns a canteen by its id
+     * Get a food provider by its id.
      * @param id
      * @return
      */
@@ -74,6 +74,11 @@ public class FoodProviderController {
     }
 
 
+    /**
+     * Get the opening hours for a specific food provider.
+     * @param id
+     * @return
+     */
     @GetMapping(value = "{id}/openinghours")
     public ResponseEntity<Object> getOpeningHours(@PathVariable int id) {
         List<OpeningHours> openingHours = openingHoursRepository.getOpeningHoursForFoodProvider(id);

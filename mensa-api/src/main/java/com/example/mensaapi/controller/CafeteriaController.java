@@ -25,7 +25,7 @@ public class CafeteriaController {
     FoodProviderTypeRepository foodProviderTypeRepository;
 
     /**
-     * Returns a list of all cafeterias
+     * Get all cafeterias.
      * @return
      */
     @GetMapping(value = "")
@@ -45,6 +45,10 @@ public class CafeteriaController {
     }
 
 
+    /**
+     * Helper method for getting a food provider object of type CAFETERIA.
+     * @return
+     */
     private FoodProviderType cafeteriaType(){
         return foodProviderTypeRepository.findByName(FetchedFoodProviderType.CAFETERIA.getValue());
     }

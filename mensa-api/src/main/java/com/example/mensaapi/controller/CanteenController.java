@@ -38,7 +38,7 @@ public class CanteenController {
     MenuRepository menuRepository;
 
     /**
-     * Returns a list of all canteens with their details and opening hours (but without meals).
+     * Get all canteens with their details and opening hours (but without meals).
      * @return
      */
     @GetMapping(value = "")
@@ -59,7 +59,7 @@ public class CanteenController {
 
 
     /**
-     * Gets the menus for today and on
+     * Get the menus for a specify canteen for today and on.
      * @param id
      * @return
      */
@@ -94,6 +94,11 @@ public class CanteenController {
     }
 
 
+    /**
+     * Get the menus for a specific canteen for today.
+     * @param id
+     * @return
+     */
     @GetMapping(value = "{id}/menus/today")
     public ResponseEntity<Object> getTodaysMenu(@PathVariable int id) {
         List<Menu> menusForToday = menuRepository.findMenusByFoodProviderIdAndDate(id, LocalDate.now());
@@ -105,6 +110,12 @@ public class CanteenController {
         return ResponseHandler.generateResponseWithoutMessage(HttpStatus.OK, constructMenuJsonObject(menusForToday, LocalDate.now()));
     }
 
+    /**
+     * Helper function to create a JSON object for a menu.
+     * @param menus
+     * @param date
+     * @return
+     */
     private JSONObject constructMenuJsonObject(List<Menu> menus, LocalDate date) {
         JSONArray jA = new JSONArray();
         for (Menu menu : menus) {
@@ -117,6 +128,11 @@ public class CanteenController {
         return jO;
     }
 
+    /**
+     * Helper function to create a JSON object for a meal.
+     * @param meal
+     * @return
+     */
     private JSONObject constructMealJsonObject(Meal meal) {
         JSONObject jO = new JSONObject();
         jO.put("id", meal.getId());
@@ -130,11 +146,22 @@ public class CanteenController {
         return jO;
     }
 
+
+    /**
+     * Helper function to convert the prices stored as an int to Euro.
+     * @param price
+     * @return
+     */
     private String mealPriceToString(int price) {
         DecimalFormat d = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.GERMANY));
         return d.format(price / 100.0) + " \u20ac";
     }
 
+
+    /**
+     * Helper method for getting a food provider object of type CANTEEN.
+     * @return
+     */
     private FoodProviderType canteenType(){
         return foodProviderTypeRepository.findByName(FetchedFoodProviderType.CANTEEN.getValue());
     }
