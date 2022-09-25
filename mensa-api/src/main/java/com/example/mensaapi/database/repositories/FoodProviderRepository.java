@@ -10,5 +10,7 @@ import java.util.Optional;
 public interface FoodProviderRepository extends CrudRepository<FoodProvider, Integer> {
     Optional<FoodProvider> getFoodProviderByName(String name);
 
-    Optional<List<FoodProvider>> getFoodProvidersByType(FoodProviderType type);
+    List<FoodProvider> getFoodProviderByType(FoodProviderType type);
+
+    Optional<FoodProvider> getFoodProviderById(int id);
 }

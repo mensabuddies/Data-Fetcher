@@ -107,7 +107,7 @@ public class MensaApiApplication {
         );
 
         // Check if this meal has ever been served in the exact same configuration
-        List<Meal> meals = mealRepository.getMealByName(fetchedMeal.getName());
+        List<Meal> meals = mealRepository.getMealsByName(fetchedMeal.getName());
         // Is there even a meal with this name?
         if (meals != null && !meals.isEmpty()) {
             // Are all details the same?
