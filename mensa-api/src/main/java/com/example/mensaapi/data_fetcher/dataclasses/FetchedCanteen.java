@@ -18,6 +18,7 @@ public class FetchedCanteen implements FetchedFoodProvider {
 
     private final String linkToFoodPlan;
 
+    private final String linkToMoreInfo;
     private final List<FetchedDay> menusPerFetchedDay;
 
     public FetchedCanteen(
@@ -26,6 +27,7 @@ public class FetchedCanteen implements FetchedFoodProvider {
             String info,
             List<FetchedOpeningHours> fetchedOpeningHours,
             String additional,
+            String linkToMoreInfo,
             String linkToFoodPlan,
             List<FetchedDay> menusPerFetchedDay
     ) {
@@ -35,6 +37,7 @@ public class FetchedCanteen implements FetchedFoodProvider {
         this.fetchedOpeningHours = fetchedOpeningHours;
         this.additional = additional;
         this.linkToFoodPlan = linkToFoodPlan;
+        this.linkToMoreInfo = linkToMoreInfo;
         this.menusPerFetchedDay = menusPerFetchedDay;
     }
 
@@ -66,6 +69,11 @@ public class FetchedCanteen implements FetchedFoodProvider {
     @Override
     public String getLinkToFoodPlan() {
         return linkToFoodPlan;
+    }
+
+    @Override
+    public String getLinkToMoreInformation() {
+        return linkToMoreInfo;
     }
 
     @Override

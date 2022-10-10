@@ -39,6 +39,9 @@ public class FoodProvider {
     @Column(name = "link_to_food_plan")
     private String linkToFoodPlan;
 
+    @Column(name = "link_to_more_information")
+    private String linkToMoreInformation;
+
 //    @OneToMany(mappedBy = "foodProvider", cascade = CascadeType.ALL)
 //    @JsonManagedReference
 //    private Set<Menu> menus;

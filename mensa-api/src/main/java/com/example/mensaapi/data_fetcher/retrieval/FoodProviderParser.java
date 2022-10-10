@@ -13,6 +13,7 @@ import org.jsoup.select.Elements;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,7 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
         String headerInfo = "";
         Location location = Location.WUERZBURG;
         String linkToFood = "";
+        String linkToMoreInformation = "";
         String additional = "";
         List<FetchedOpeningHours> op = new ArrayList<>();
         boolean isCafeteria = false;
@@ -72,8 +74,15 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
             additional = (opening.get(0).getElementsByTag("p").text());
 
             // Get Link
+            var links = detail.getElementsByClass("fi");
+
             if (!isCafeteria)
-                linkToFood = ("https://www.studentenwerk-wuerzburg.de" + detail.getElementsByClass("fi").attr("href"));
+                linkToFood = ("https://www.studentenwerk-wuerzburg.de" +
+                        links.val("zum Speiseplan").attr("href"));
+
+            // Get More Info
+            linkToMoreInformation = ("https://www.studentenwerk-wuerzburg.de" +
+                    links.val(" Weitere Informationen").attr("href"));
         }
 
         List<FetchedDay> menus = new ArrayList<>();
@@ -96,6 +105,7 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
                     name,
                     location,
                     headerInfo,
+                    linkToMoreInformation,
                     op,
                     additional
             ));
@@ -107,6 +117,7 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
                     op,
                     additional,
                     linkToFood,
+                    linkToMoreInformation,
                     menus
             ));
         }

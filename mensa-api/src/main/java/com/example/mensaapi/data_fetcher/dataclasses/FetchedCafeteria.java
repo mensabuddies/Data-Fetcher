@@ -15,13 +15,17 @@ public class FetchedCafeteria implements FetchedFoodProvider {
     private Location location;
     private final String info;
     private final List<FetchedOpeningHours> fetchedOpeningHours;
+
+    private final String linkToMoreInformation;
+
     private final String additional;
 
-    public FetchedCafeteria(String name, Location location, String info, List<FetchedOpeningHours> fetchedOpeningHours, String additional) {
+    public FetchedCafeteria(String name, Location location, String info, String linkToMoreInformation, List<FetchedOpeningHours> fetchedOpeningHours, String additional) {
         this.name = name;
         this.location = location;
         this.info = info;
         this.fetchedOpeningHours = fetchedOpeningHours;
+        this.linkToMoreInformation = linkToMoreInformation;
         this.additional = additional;
     }
 
@@ -54,6 +58,11 @@ public class FetchedCafeteria implements FetchedFoodProvider {
     @Override
     public String getLinkToFoodPlan() {
         return "";
+    }
+
+    @Override
+    public String getLinkToMoreInformation() {
+        return linkToMoreInformation;
     }
 
     @Override

@@ -23,6 +23,8 @@ public interface FetchedFoodProvider {
 
     String getLinkToFoodPlan();
 
+    String getLinkToMoreInformation();
+
     List<FetchedDay> getMenus();
 
     Optional<FetchedDay> getMenuOfDay(LocalDate date);
@@ -38,6 +40,7 @@ public interface FetchedFoodProvider {
             List<FetchedOpeningHours> fetchedOpeningHours,
             String additional,
             String linkToFoodPlan,
+            String linkToMoreInformation,
             List<FetchedDay> menusPerFetchedDay
     ) {
         return new FetchedCanteen(
@@ -46,6 +49,7 @@ public interface FetchedFoodProvider {
                 info,
                 fetchedOpeningHours,
                 additional,
+                linkToMoreInformation,
                 linkToFoodPlan,
                 menusPerFetchedDay
         );
@@ -55,6 +59,7 @@ public interface FetchedFoodProvider {
             String name,
             Location location,
             String info,
+            String linkToMoreInformation,
             List<FetchedOpeningHours> fetchedOpeningHours,
             String additional
     ) {
@@ -62,6 +67,7 @@ public interface FetchedFoodProvider {
                 name,
                 location,
                 info,
+                linkToMoreInformation,
                 fetchedOpeningHours,
                 additional
         );
