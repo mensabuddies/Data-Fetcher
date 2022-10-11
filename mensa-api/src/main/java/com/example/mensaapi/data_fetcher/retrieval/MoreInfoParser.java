@@ -5,12 +5,10 @@ import com.example.mensaapi.data_fetcher.retrieval.interfaces.Parser;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
 import org.jsoup.select.NodeFilter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MoreInfoParser implements Parser<Map<Information, String>> {
@@ -41,18 +39,34 @@ public class MoreInfoParser implements Parser<Map<Information, String>> {
         }
 
         try {
+
             result.put(Information.DESCRIPTION,
                     fetched.getElementsByTag("p").stream()
                             .flatMap(element -> element.childNodes().stream())
                             .filter(element ->
-                                    element instanceof TextNode
+                                    (element instanceof TextNode) || (element.nodeName().equals("em"))
                             )
-                            .map(element -> ((TextNode) element).getWholeText())
+                            .flatMap(element -> extractAllTextNodes(element).stream())
+                            .map(TextNode::getWholeText)
                             .collect(Collectors.joining("\n\n"))
             );
         } catch (Exception e) {
             result.put(Information.DESCRIPTION, "");
         }
         return Optional.of(result);
+    }
+
+    private List<TextNode> extractAllTextNodes(Node element) {
+        var result = new ArrayList<TextNode>();
+
+        if (element instanceof TextNode)
+            result.add((TextNode) element);
+
+        for (var child:
+             element.childNodes()) {
+            if (!child.nodeName().equals("strong")) // Ignore Address
+                result.addAll(extractAllTextNodes(child));
+        }
+        return result;
     }
 }
