@@ -18,6 +18,8 @@ public class JsonCreators {
         jO.put("additionalInfo", fp.getAdditionalInfo());
         jO.put("linkToFoodPlan", fp.getLinkToFoodPlan());
         jO.put("type", fp.getType().getName());
+        jO.put("description", fp.getDescription());
+        jO.put("address", fp.getAddress());
 
         return jO;
     }

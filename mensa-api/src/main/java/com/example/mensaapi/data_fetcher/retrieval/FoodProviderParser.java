@@ -73,16 +73,23 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
             // Get additional information (e.g. evening mensa)
             additional = (opening.get(0).getElementsByTag("p").text());
 
-            // Get Link
-            var links = detail.getElementsByClass("fi");
 
-            if (!isCafeteria)
-                linkToFood = ("https://www.studentenwerk-wuerzburg.de" +
-                        links.val("zum Speiseplan").attr("href"));
+            var raw = ("https://www.studentenwerk-wuerzburg.de" +
+                    detail.getElementsByClass("fi").attr("href"));
 
-            // Get More Info
-            linkToMoreInformation = ("https://www.studentenwerk-wuerzburg.de" +
-                    links.val(" Weitere Informationen").attr("href"));
+            if (!isCafeteria) {
+                linkToFood = raw;
+                var loc = raw.substring(raw.lastIndexOf("-")+1, raw.lastIndexOf("."));
+                linkToMoreInformation = linkToFood.replace(
+                        "essen-trinken/speiseplaene",
+                        loc + "/essen-trinken/mensen"
+                );
+            }
+            else{
+                linkToMoreInformation = raw;
+            }
+
+
         }
 
         List<FetchedDay> menus = new ArrayList<>();
@@ -107,7 +114,9 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
                     headerInfo,
                     linkToMoreInformation,
                     op,
-                    additional
+                    additional,
+                    "", // Will be parsed later
+                    ""
             ));
         } else {
             return Optional.of(FetchedFoodProvider.createCanteen(
@@ -118,7 +127,9 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
                     additional,
                     linkToFood,
                     linkToMoreInformation,
-                    menus
+                    menus,
+                    "", // Will be parsed later
+                    ""
             ));
         }
     }

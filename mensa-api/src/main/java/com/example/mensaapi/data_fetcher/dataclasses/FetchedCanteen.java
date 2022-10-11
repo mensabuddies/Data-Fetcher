@@ -21,6 +21,10 @@ public class FetchedCanteen implements FetchedFoodProvider {
     private final String linkToMoreInfo;
     private final List<FetchedDay> menusPerFetchedDay;
 
+    private String description;
+
+    private String address;
+
     public FetchedCanteen(
             String name,
             Location location,
@@ -29,7 +33,9 @@ public class FetchedCanteen implements FetchedFoodProvider {
             String additional,
             String linkToMoreInfo,
             String linkToFoodPlan,
-            List<FetchedDay> menusPerFetchedDay
+            List<FetchedDay> menusPerFetchedDay,
+            String description,
+            String address
     ) {
         this.name = name;
         this.location = location;
@@ -39,6 +45,8 @@ public class FetchedCanteen implements FetchedFoodProvider {
         this.linkToFoodPlan = linkToFoodPlan;
         this.linkToMoreInfo = linkToMoreInfo;
         this.menusPerFetchedDay = menusPerFetchedDay;
+        this.description = description;
+        this.address = address;
     }
 
     @Override
@@ -82,6 +90,16 @@ public class FetchedCanteen implements FetchedFoodProvider {
     }
 
     @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public String getAddress() {
+        return address;
+    }
+
+    @Override
     public Optional<FetchedDay> getMenuOfDay(LocalDate date) {
         return menusPerFetchedDay.stream().filter(menu -> menu.getDate().equals(date)).findFirst();
     }
@@ -107,5 +125,15 @@ public class FetchedCanteen implements FetchedFoodProvider {
     @Override
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    @Override
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Override
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

@@ -8,6 +8,7 @@ import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public interface FetchedFoodProvider {
@@ -27,9 +28,17 @@ public interface FetchedFoodProvider {
 
     List<FetchedDay> getMenus();
 
+    String getDescription();
+
+    String getAddress();
+
     Optional<FetchedDay> getMenuOfDay(LocalDate date);
 
     FetchedFoodProviderType getType();
+
+    void setDescription(String description);
+
+    void setAddress(String address);
 
     void setLocation(Location location);
 
@@ -41,7 +50,9 @@ public interface FetchedFoodProvider {
             String additional,
             String linkToFoodPlan,
             String linkToMoreInformation,
-            List<FetchedDay> menusPerFetchedDay
+            List<FetchedDay> menusPerFetchedDay,
+            String description,
+            String address
     ) {
         return new FetchedCanteen(
                 name,
@@ -51,7 +62,9 @@ public interface FetchedFoodProvider {
                 additional,
                 linkToMoreInformation,
                 linkToFoodPlan,
-                menusPerFetchedDay
+                menusPerFetchedDay,
+                description,
+                address
         );
     }
 
@@ -61,7 +74,9 @@ public interface FetchedFoodProvider {
             String info,
             String linkToMoreInformation,
             List<FetchedOpeningHours> fetchedOpeningHours,
-            String additional
+            String additional,
+            String description,
+            String address
     ) {
         return new FetchedCafeteria(
                 name,
@@ -69,7 +84,9 @@ public interface FetchedFoodProvider {
                 info,
                 linkToMoreInformation,
                 fetchedOpeningHours,
-                additional
+                additional,
+                description,
+                address
         );
     }
 }

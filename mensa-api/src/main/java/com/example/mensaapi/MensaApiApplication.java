@@ -136,7 +136,11 @@ public class MensaApiApplication {
         foodProvider.setLocation(locationRepository.getLocationByName(fetchedFoodProvider.getLocation().getValue()));
         foodProvider.setInfo(fetchedFoodProvider.getTitleInfo());
         foodProvider.setAdditionalInfo(fetchedFoodProvider.getBodyInfo());
+
         foodProvider.setLinkToFoodPlan(fetchedFoodProvider.getLinkToFoodPlan());
+        foodProvider.setAddress(fetchedFoodProvider.getAddress());
+        foodProvider.setDescription(fetchedFoodProvider.getDescription());
+
         foodProvider.setLinkToMoreInformation(fetchedFoodProvider.getLinkToMoreInformation());
         foodProvider.setType(foodProviderTypeRepository.findByName(fetchedFoodProvider.getType().getValue()));
 

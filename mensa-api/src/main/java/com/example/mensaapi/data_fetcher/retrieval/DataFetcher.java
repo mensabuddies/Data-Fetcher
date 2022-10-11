@@ -1,6 +1,7 @@
 package com.example.mensaapi.data_fetcher.retrieval;
 
 import com.example.mensaapi.data_fetcher.dataclasses.FetchedData;
+import com.example.mensaapi.data_fetcher.dataclasses.enums.Information;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.Location;
 import com.example.mensaapi.data_fetcher.retrieval.interfaces.Fetcher;
 import com.example.mensaapi.data_fetcher.retrieval.interfaces.Parser;
@@ -8,6 +9,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class DataFetcher implements Fetcher<FetchedData> {
@@ -40,6 +42,23 @@ public class DataFetcher implements Fetcher<FetchedData> {
 
         }
 
+        var moreInfoParser = Parser.createMoreInfoParser();
+
+        // Extract additional info here
+        fetchedData.getFetchedFoodProviders().forEach((fetchedFoodProvider -> {
+            Optional<Document> docInfo = Fetcher.createJsoupFetcher(fetchedFoodProvider.getLinkToMoreInformation())
+                    .fetchCurrentData();
+            if (docInfo.isPresent()) {
+                var result = moreInfoParser.parse(
+                        Objects.requireNonNull(docInfo.get().getElementsByClass("content").first())
+                );
+                result.ifPresent(information -> {
+                        fetchedFoodProvider.setAddress(information.get(Information.ADDRESS));
+                        fetchedFoodProvider.setDescription(information.get(Information.DESCRIPTION));
+                }
+                );
+            }
+        }));
         //System.out.println(fetchedCanteens);
     }
 
