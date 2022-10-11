@@ -13,6 +13,7 @@ import org.jsoup.select.Elements;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,7 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
         String headerInfo = "";
         Location location = Location.WUERZBURG;
         String linkToFood = "";
+        String linkToMoreInformation = "";
         String additional = "";
         List<FetchedOpeningHours> op = new ArrayList<>();
         boolean isCafeteria = false;
@@ -71,9 +73,23 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
             // Get additional information (e.g. evening mensa)
             additional = (opening.get(0).getElementsByTag("p").text());
 
-            // Get Link
-            if (!isCafeteria)
-                linkToFood = ("https://www.studentenwerk-wuerzburg.de" + detail.getElementsByClass("fi").attr("href"));
+
+            var raw = ("https://www.studentenwerk-wuerzburg.de" +
+                    detail.getElementsByClass("fi").attr("href"));
+
+            if (!isCafeteria) {
+                linkToFood = raw;
+                var loc = raw.substring(raw.lastIndexOf("-")+1, raw.lastIndexOf("."));
+                linkToMoreInformation = linkToFood.replace(
+                        "essen-trinken/speiseplaene",
+                        loc + "/essen-trinken/mensen"
+                );
+            }
+            else{
+                linkToMoreInformation = raw;
+            }
+
+
         }
 
         List<FetchedDay> menus = new ArrayList<>();
@@ -96,8 +112,11 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
                     name,
                     location,
                     headerInfo,
+                    linkToMoreInformation,
                     op,
-                    additional
+                    additional,
+                    "", // Will be parsed later
+                    ""
             ));
         } else {
             return Optional.of(FetchedFoodProvider.createCanteen(
@@ -107,7 +126,10 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
                     op,
                     additional,
                     linkToFood,
-                    menus
+                    linkToMoreInformation,
+                    menus,
+                    "", // Will be parsed later
+                    ""
             ));
         }
     }

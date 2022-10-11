@@ -3,6 +3,7 @@ package com.example.mensaapi.data_fetcher.retrieval.interfaces;
 import com.example.mensaapi.data_fetcher.retrieval.DayParser;
 import com.example.mensaapi.data_fetcher.retrieval.FoodProviderParser;
 import com.example.mensaapi.data_fetcher.retrieval.MealParser;
+import com.example.mensaapi.data_fetcher.retrieval.MoreInfoParser;
 import org.jsoup.nodes.Element;
 
 import java.util.Optional;
@@ -20,5 +21,9 @@ public interface Parser<T> {
 
     static FoodProviderParser createFoodProviderParser() {
         return new FoodProviderParser();
+    }
+
+    static MoreInfoParser createMoreInfoParser() {
+        return new MoreInfoParser();
     }
 }

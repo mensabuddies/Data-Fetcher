@@ -15,14 +15,33 @@ public class FetchedCafeteria implements FetchedFoodProvider {
     private Location location;
     private final String info;
     private final List<FetchedOpeningHours> fetchedOpeningHours;
+
+    private final String linkToMoreInformation;
+
     private final String additional;
 
-    public FetchedCafeteria(String name, Location location, String info, List<FetchedOpeningHours> fetchedOpeningHours, String additional) {
+    private String description;
+
+    private String address;
+
+    public FetchedCafeteria(
+            String name,
+            Location location,
+            String info,
+            String linkToMoreInformation,
+            List<FetchedOpeningHours> fetchedOpeningHours,
+            String additional,
+            String description,
+            String address
+    ) {
         this.name = name;
         this.location = location;
         this.info = info;
         this.fetchedOpeningHours = fetchedOpeningHours;
+        this.linkToMoreInformation = linkToMoreInformation;
         this.additional = additional;
+        this.description = description;
+        this.address = address;
     }
 
 
@@ -57,8 +76,23 @@ public class FetchedCafeteria implements FetchedFoodProvider {
     }
 
     @Override
+    public String getLinkToMoreInformation() {
+        return linkToMoreInformation;
+    }
+
+    @Override
     public List<FetchedDay> getMenus() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public String getAddress() {
+        return address;
     }
 
     @Override
@@ -69,6 +103,16 @@ public class FetchedCafeteria implements FetchedFoodProvider {
     @Override
     public FetchedFoodProviderType getType() {
         return FetchedFoodProviderType.CAFETERIA;
+    }
+
+    @Override
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Override
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     @Override

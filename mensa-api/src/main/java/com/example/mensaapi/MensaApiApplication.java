@@ -68,7 +68,7 @@ public class MensaApiApplication {
     }
 
     @Scheduled(cron = "0 0 0 * * *") // Täglich um 0 Uhr
-    //@Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 1000000)
     private void storeStudentenwerkDataInDatabase() {
         Optional<FetchedData> fetchedData = new DataFetcher().fetchCurrentData();
 
@@ -136,7 +136,12 @@ public class MensaApiApplication {
         foodProvider.setLocation(locationRepository.getLocationByName(fetchedFoodProvider.getLocation().getValue()));
         foodProvider.setInfo(fetchedFoodProvider.getTitleInfo());
         foodProvider.setAdditionalInfo(fetchedFoodProvider.getBodyInfo());
+
         foodProvider.setLinkToFoodPlan(fetchedFoodProvider.getLinkToFoodPlan());
+        foodProvider.setAddress(fetchedFoodProvider.getAddress());
+        foodProvider.setDescription(fetchedFoodProvider.getDescription());
+
+        foodProvider.setLinkToMoreInformation(fetchedFoodProvider.getLinkToMoreInformation());
         foodProvider.setType(foodProviderTypeRepository.findByName(fetchedFoodProvider.getType().getValue()));
 
         List<OpeningHours> openingHours = openingHoursRepository.findByFoodProviderIdEqualsOrderByWeekday(foodProvider.getId()).orElse(new ArrayList<>());
