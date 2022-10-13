@@ -3,6 +3,7 @@ package com.example.mensaapi;
 import com.example.mensaapi.data_fetcher.dataclasses.FetchedData;
 import com.example.mensaapi.data_fetcher.dataclasses.FetchedDay;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.FetchedFoodProviderType;
+import com.example.mensaapi.data_fetcher.dataclasses.enums.MealComponentTypeEnum;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedFoodProvider;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedMeal;
 import com.example.mensaapi.data_fetcher.dataclasses.interfaces.FetchedOpeningHours;
@@ -19,10 +20,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.DayOfWeek;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 @SpringBootApplication
 public class MensaApiApplication {
@@ -44,6 +42,12 @@ public class MensaApiApplication {
     @Autowired
     FoodProviderTypeRepository foodProviderTypeRepository;
 
+    @Autowired
+    MealComponentTypeRepository mealComponentTypeRepository;
+
+    @Autowired
+    MealComponentRepository mealComponentRepository;
+
     public static void main(String[] args) {
         SpringApplication.run(MensaApiApplication.class, args);
     }
@@ -55,7 +59,7 @@ public class MensaApiApplication {
                 Util u = new Util();
                 u.insertWeekdays(weekdayRepository);
                 u.insertLocations(locationRepository);
-                u.insertTypes(foodProviderTypeRepository);
+                u.insertTypes(foodProviderTypeRepository, mealComponentTypeRepository);
             }
             /// For debugging
             //saveLatestData();
@@ -97,13 +101,28 @@ public class MensaApiApplication {
 
 
     private Meal storeMeal(FetchedMeal fetchedMeal) {
+        List<MealComponent> ingredients = new ArrayList<>();
+        List<MealComponent> allergens = new ArrayList<>();
+
+        for (String name:
+             Arrays.stream(fetchedMeal.getIngredientsRaw().split(",")).toList()) {
+            ingredients.add(storeMealComponent(MealComponentTypeEnum.INGREDIENT, name));
+        }
+
+        for (String name:
+                Arrays.stream(fetchedMeal.getAllergensRaw().split(",")).toList()) {
+            allergens.add(storeMealComponent(MealComponentTypeEnum.ALLERGEN, name));
+        }
+
+
+
         Meal meal = new Meal(
                 fetchedMeal.getName(),
                 fetchedMeal.getPriceStudent(),
                 fetchedMeal.getPriceEmployee(),
                 fetchedMeal.getPriceGuest(),
-                fetchedMeal.getAllergensRaw(),
-                fetchedMeal.getIngredientsRaw()
+                allergens,
+                ingredients
         );
 
         // Check if this meal has ever been served in the exact same configuration
@@ -127,6 +146,14 @@ public class MensaApiApplication {
         }
 
         return mealRepository.save(meal);
+    }
+
+    private MealComponent storeMealComponent(MealComponentTypeEnum type, String name) {
+        MealComponent mc = new MealComponent(mealComponentTypeRepository.findByName(type.getValue()), name);
+        Optional<MealComponent> dbMealComponent = mealComponentRepository.getMealComponentByName(name);
+        if (dbMealComponent.isEmpty())
+            mealComponentRepository.save(mc);
+        return dbMealComponent.orElse(mc);
     }
 
     private FoodProvider storeFoodProvider(FetchedFoodProvider fetchedFoodProvider) {

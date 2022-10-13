@@ -8,7 +8,9 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "meals")
@@ -36,16 +38,37 @@ public class Meal {
     private int priceGuest;
 
     @Column
-    private String allergens;
+    @ManyToMany
+    @JoinColumn(name = "meal_component_id")
+   // @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.MERGE, org.hibernate.annotations.CascadeType.PERSIST})
+    private List<MealComponent> allergens;
 
     @Column
-    private String ingredients;
+    @ManyToMany
+    @JoinColumn(name = "meal_component_id")
+   // @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.MERGE, org.hibernate.annotations.CascadeType.PERSIST})
+    private List<MealComponent> ingredients;
 
     @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonBackReference
     private Set<Menu> menus;
 
-    public Meal(String name, int priceStudent, int priceEmployee, int priceGuest, String allergens, String ingredients) {
+    public String getIngredientsAsString() {
+        return ingredients.stream().map(MealComponent::getName).collect(Collectors.joining(","));
+    }
+
+    public String getAllergensAsString() {
+        return allergens.stream().map(MealComponent::getName).collect(Collectors.joining(","));
+    }
+
+    public Meal(
+            String name,
+            int priceStudent,
+            int priceEmployee,
+            int priceGuest,
+            List<MealComponent> allergens,
+            List<MealComponent> ingredients
+    ) {
         this.name = name;
         this.priceStudent = priceStudent;
         this.priceEmployee = priceEmployee;

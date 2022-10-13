@@ -4,14 +4,12 @@ import com.example.mensaapi.ResponseHandler;
 import com.example.mensaapi.data_fetcher.dataclasses.enums.FetchedFoodProviderType;
 import com.example.mensaapi.database.entities.FoodProvider;
 import com.example.mensaapi.database.entities.FoodProviderType;
-import com.example.mensaapi.database.entities.Meal;
 import com.example.mensaapi.database.entities.Menu;
 import com.example.mensaapi.database.repositories.FoodProviderRepository;
 import com.example.mensaapi.database.repositories.FoodProviderTypeRepository;
 import com.example.mensaapi.database.repositories.MenuRepository;
 import com.example.mensaapi.database.repositories.OpeningHoursRepository;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -86,7 +81,7 @@ public class CanteenController {
                     menusForToday.add(menu);
                 }
             }
-            jA.add(constructMenuJsonObject(menusForToday, date));
+            jA.add(JsonCreators.constructMenuJsonObject(menusForToday, date));
         }
         Collections.reverse(jA);
 
@@ -107,55 +102,15 @@ public class CanteenController {
             return ResponseHandler.generateError(HttpStatus.NOT_FOUND, "No menus for that canteen today.");
         }
 
-        return ResponseHandler.generateResponseWithoutMessage(HttpStatus.OK, constructMenuJsonObject(menusForToday, LocalDate.now()));
-    }
-
-    /**
-     * Helper function to create a JSON object for a menu.
-     * @param menus
-     * @param date
-     * @return
-     */
-    private JSONObject constructMenuJsonObject(List<Menu> menus, LocalDate date) {
-        JSONArray jA = new JSONArray();
-        for (Menu menu : menus) {
-            jA.add(constructMealJsonObject(menu.getMeal()));
-        }
-
-        JSONObject jO = new JSONObject();
-        jO.put("date", date);
-        jO.put("meals", jA);
-        return jO;
-    }
-
-    /**
-     * Helper function to create a JSON object for a meal.
-     * @param meal
-     * @return
-     */
-    private JSONObject constructMealJsonObject(Meal meal) {
-        JSONObject jO = new JSONObject();
-        jO.put("id", meal.getId());
-        jO.put("name", meal.getName());
-        jO.put("priceStudent", mealPriceToString(meal.getPriceStudent()));
-        jO.put("priceEmployee", mealPriceToString(meal.getPriceEmployee()));
-        jO.put("priceGuest", mealPriceToString(meal.getPriceGuest()));
-        jO.put("allergens", meal.getAllergens());
-        jO.put("ingredients", meal.getIngredients());
-
-        return jO;
+        return ResponseHandler.generateResponseWithoutMessage(HttpStatus.OK, JsonCreators.constructMenuJsonObject(menusForToday, LocalDate.now()));
     }
 
 
-    /**
-     * Helper function to convert the prices stored as an int to Euro.
-     * @param price
-     * @return
-     */
-    private String mealPriceToString(int price) {
-        DecimalFormat d = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.GERMANY));
-        return d.format(price / 100.0) + " \u20ac";
-    }
+
+
+
+
+
 
 
     /**
