@@ -31,22 +31,19 @@ public class Main {
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .setDatabaseUrl("http://127.0.0.1:8080")
+                .setDatabaseUrl("http://localhost:8080")
                 .build();
 
         FirebaseApp.initializeApp(options);
+
         Firestore db = FirestoreClient.getFirestore();
 
         Main getHelloWorld = new Main();
         HashMap<String, String> helloWorld = getHelloWorld.getHelloWorldFromLocal();
-        ApiFuture<WriteResult> future = db.collection("helloWorld").document("test")
+        ApiFuture<WriteResult> future = db.collection("test").document("testMessages")
                 .set(helloWorld);
 
         System.out.println("Successfully updated at: " + future.get().getUpdateTime());
-
-
-
-
     }
 
     private HashMap<String, String> getHelloWorldFromLocal() {
