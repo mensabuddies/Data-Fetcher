@@ -132,10 +132,14 @@ public class Main {
         return h;
     }
 
-    private HashMap<String, String> getHelloWorldFromLocal() {
-        HashMap<String, String> res = new HashMap<>();
-        res.put("message", "Hello World");
-        return res;
+    private static HashMap<String, Object> createCanteenHashMap (Integer id, FetchedCanteen canteen){
+        HashMap<String, Object> h = new HashMap<>();
+        h.put("id", id);
+        h.put("info", canteen.getTitleInfo());
+        h.put("additionalInfo", canteen.getBodyInfo());
+        h.put("address", canteen.getAddress());
+
+        return h;
     }
 
     private static String mealPriceToString(int price) {
