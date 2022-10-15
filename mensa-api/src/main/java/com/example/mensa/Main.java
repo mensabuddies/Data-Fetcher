@@ -64,6 +64,7 @@ public class Main {
 
                 // Menus --------------------------------------------------------------------------------------
                 CollectionReference canteenMenuReference = canteenRef.collection("menus");
+                CollectionReference additivesReference = db.collection("additives");
 
                 for (var menu : canteen.getMenus()) {
                     for (var meal : menu.getMeals()) {
@@ -74,10 +75,32 @@ public class Main {
 
                         batch.set(mealReference, createMealHashMap(meal));
 
-                        DocumentReference allergenReference = db.collection("additives").document("allergens");
-                        DocumentReference ingredientReference = db.collection("additives").document("ingredients");
-                        batch.set(allergenReference, Map.of("items", Arrays.stream(meal.getAllergensRaw().split(",")).toList()), SetOptions.merge());
-                        batch.set(ingredientReference, Map.of("items", Arrays.stream(meal.getIngredientsRaw().split(",")).toList()), SetOptions.merge());
+                        /*
+                            Some formatting has to be done. For example "Rind/Kalb" is interpreted as a path
+                            so replace '/' with something else
+
+                            TODO: Some additives are both allergen and ingredient. As there are only a few ingredients
+                            TODO: they should be classified as ingredient (they are usually ingredients in first place)
+                         */
+
+                        for (var allergen: meal.getAllergensRaw().split(",")) {
+                            if (!allergen.isBlank())
+                                batch.set(additivesReference.document(allergen.replace("/", "-")), Map.of("type", "allergen"));
+                        }
+
+                        for (var ingredient : meal.getIngredientsRaw().split(",")) {
+                            if (!ingredient.isBlank())
+                                batch.set(additivesReference.document(ingredient.replace("/", "-")), Map.of("type", "ingredient"));
+                        }
+
+
+
+
+
+
+
+
+
 
                     }
                 }
