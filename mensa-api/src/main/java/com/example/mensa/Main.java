@@ -66,13 +66,24 @@ public class Main {
                 id++;
             }
 
+            /*
+                Some formatting has to be done. For example "Rind/Kalb" is interpreted as a path
+                so replace '/' with something else
+            */
+
             for (var allergen : additives.get(ALLERGENS)) {
                 if (!allergen.isBlank())
-                    batch.set(additivesReference.document(allergen), Map.of("type", "allergen"));
+                    batch.set(additivesReference.document(allergen.replace("/", "-")), Map.of(
+                            "type", "allergen",
+                            "name", allergen
+                    ));
             }
             for (var ingredient : additives.get(INGREDIENTS)) {
                 if (!ingredient.isBlank())
-                    batch.set(additivesReference.document(ingredient), Map.of("type", "ingredient"));
+                    batch.set(additivesReference.document(ingredient.replace("/", "-")), Map.of(
+                            "type", "ingredient",
+                            "name", ingredient
+                    ));
             }
 
             ApiFuture<List<WriteResult>> future = batch.commit();
@@ -101,7 +112,6 @@ public class Main {
         var foodProviderHashMap = createFoodProviderHashMap(id, foodProvider);
 
 
-
         batch.set(foodProviderRef, foodProviderHashMap);
 
         CollectionReference foodProviderDescriptionReference = foodProviderRef
@@ -123,32 +133,25 @@ public class Main {
 
                     batch.set(mealReference, createMealHashMap(meal));
 
-                            /*
-                                Some formatting has to be done. For example "Rind/Kalb" is interpreted as a path
-                                so replace '/' with something else
-
-                                TODO: Some additives are both allergen and ingredient. As there are only a few ingredients
-                                TODO: they should be classified as ingredient (they are usually ingredients in first place)
-                             */
 
                     if (!additives.containsKey(ALLERGENS)) {
-                        var hashSet = new HashSet<>(List.of(meal.getAllergensRaw().replace("/", "-").split(",")));
+                        var hashSet = new HashSet<>(List.of(meal.getAllergensRaw().split(",")));
                         additives.put(ALLERGENS, hashSet);
                     } else {
                         var temp = additives.get(ALLERGENS);
                         temp.addAll(
-                                Set.of(meal.getAllergensRaw().replace("/", "-").split(","))
+                                Set.of(meal.getAllergensRaw().split(","))
                         );
                         additives.put(ALLERGENS, temp);
                     }
 
                     if (!additives.containsKey(INGREDIENTS)) {
-                        var hashSet = new HashSet<>(List.of(meal.getIngredientsRaw().replace("/", "-").split(",")));
+                        var hashSet = new HashSet<>(List.of(meal.getIngredientsRaw().split(",")));
                         additives.put(INGREDIENTS, hashSet);
                     } else {
                         var temp = additives.get(INGREDIENTS);
                         temp.addAll(
-                                Set.of(meal.getIngredientsRaw().replace("/", "-").split(","))
+                                Set.of(meal.getIngredientsRaw().split(","))
                         );
                         additives.put(INGREDIENTS, temp);
                     }
