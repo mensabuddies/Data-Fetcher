@@ -13,21 +13,14 @@ import com.google.cloud.firestore.*;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
-import com.google.firestore.v1.Document;
-import com.google.firestore.v1.Write;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.WildcardType;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Main {
 
@@ -104,9 +97,7 @@ public class Main {
         var type = foodProvider.getType().getValue();
 
         DocumentReference foodProviderRef = db
-                .collection(type)
-                .document("location")
-                .collection(foodProvider.getLocation().getValue())
+                .collection("foodProviders")
                 .document(foodProvider.getName());
 
         var foodProviderHashMap = createFoodProviderHashMap(id, foodProvider);
@@ -192,12 +183,36 @@ public class Main {
 
     private static HashMap<String, Object> createFoodProviderHashMap(Integer id, FetchedFoodProvider foodProvider) {
         HashMap<String, Object> h = new HashMap<>();
+
+        // e.g. "Mensateria Campus Hubland Nord Würzburg"
+        var longName = foodProvider.getName();
+
+        var firstWhiteSpace = longName.indexOf(" ");
+        var lastWhiteSpace = longName.lastIndexOf(" ");
+
+        var type = longName.substring(0, firstWhiteSpace);
+        var name = capitalize(longName.substring(firstWhiteSpace + 1, lastWhiteSpace));
+
         h.put("id", id);
         h.put("info", foodProvider.getTitleInfo());
         h.put("additionalInfo", foodProvider.getBodyInfo());
         h.put("address", foodProvider.getAddress());
+        // Whether it is a canteen or cafeteria
+        h.put("category", foodProvider.getType().getValue());
+        // Whether it is a mensateria, interimsmensa etc.
+        h.put("type", type);
+        h.put("name", name);
+        h.put("location", foodProvider.getLocation().getValue());
 
         return h;
+    }
+
+    public static String capitalize(String str) {
+        if(str == null || str.isEmpty()) {
+            return str;
+        }
+
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
     private static String mealPriceToString(int price) {
