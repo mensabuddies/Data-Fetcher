@@ -28,6 +28,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Main {
+
+    private static final int ALLERGENS = 1;
+    private static final int INGREDIENTS = 2;
+
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         FileInputStream serviceAccount = new FileInputStream("./AdminKey.json");
 
@@ -41,13 +45,17 @@ public class Main {
 
         Optional<FetchedData> dataFetcher = new DataFetcher().fetchCurrentData();
 
+        var additives = new HashMap<Integer, Set<String>>();
+        CollectionReference additivesReference = db.collection("additives");
+
+        WriteBatch batch = db.batch();
+
         dataFetcher.ifPresent(data -> {
             var c = data.getFetchedCanteens();
             Integer id = 1;
-            for(FetchedCanteen canteen : c){
+            for (FetchedCanteen canteen : c) {
                 var canteenHashMap = createCanteenHashMap(id, canteen);
 
-                WriteBatch batch = db.batch();
 
                 DocumentReference canteenRef = db
                         .collection("canteens")
@@ -64,7 +72,6 @@ public class Main {
 
                 // Menus --------------------------------------------------------------------------------------
                 CollectionReference canteenMenuReference = canteenRef.collection("menus");
-                CollectionReference additivesReference = db.collection("additives");
 
                 for (var menu : canteen.getMenus()) {
                     for (var meal : menu.getMeals()) {
@@ -83,54 +90,61 @@ public class Main {
                             TODO: they should be classified as ingredient (they are usually ingredients in first place)
                          */
 
-                        for (var allergen: meal.getAllergensRaw().split(",")) {
-                            if (!allergen.isBlank())
-                                batch.set(additivesReference.document(allergen.replace("/", "-")), Map.of("type", "allergen"));
+                        if (!additives.containsKey(ALLERGENS)) {
+                            var hashSet = new HashSet<>(List.of(meal.getAllergensRaw().replace("/", "-").split(",")));
+                            additives.put(ALLERGENS, hashSet);
+                        } else {
+                            var temp = additives.get(ALLERGENS);
+                            temp.addAll(
+                                    Set.of(meal.getAllergensRaw().replace("/", "-").split(","))
+                            );
+                            additives.put(ALLERGENS, temp);
                         }
 
-                        for (var ingredient : meal.getIngredientsRaw().split(",")) {
-                            if (!ingredient.isBlank())
-                                batch.set(additivesReference.document(ingredient.replace("/", "-")), Map.of("type", "ingredient"));
+                        if (!additives.containsKey(INGREDIENTS)) {
+                            var hashSet = new HashSet<>(List.of(meal.getIngredientsRaw().replace("/", "-").split(",")));
+                            additives.put(INGREDIENTS, hashSet);
+                        } else {
+                            var temp = additives.get(INGREDIENTS);
+                            temp.addAll(
+                                    Set.of(meal.getIngredientsRaw().replace("/", "-").split(","))
+                            );
+                            additives.put(INGREDIENTS, temp);
                         }
-
-
-
-
-
-
-
-
-
-
                     }
                 }
-
-
-
                 // --------------------------------------------------------------------------------------
 
                 // Opening Hours
                 CollectionReference openingHoursRef = canteenRef.collection("openingHours");
 
-                for(FetchedOpeningHours o : canteen.getOpeningHours()){
+                for (FetchedOpeningHours o : canteen.getOpeningHours()) {
                     batch.set(
                             openingHoursRef.document(o.getWeekday().getDisplayName(TextStyle.FULL, Locale.GERMAN)),
                             createOpeningHoursHashMap(o));
                 }
-
-                // asynchronously commit the batch ------------------------------------------------------
-                ApiFuture<List<WriteResult>> future = batch.commit();
-
-                try {
-                    for (WriteResult result : future.get()) {
-                        System.out.println("Update time : " + result.getUpdateTime());
-                    }
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
                 id++;
+            }
+
+            for (var allergen : additives.get(ALLERGENS)) {
+                if (!allergen.isBlank())
+                    batch.set(additivesReference.document(allergen), Map.of("type", "allergen"));
+            }
+            for (var ingredient : additives.get(INGREDIENTS)) {
+                if (!ingredient.isBlank())
+                    batch.set(additivesReference.document(ingredient), Map.of("type", "ingredient"));
+            }
+
+            ApiFuture<List<WriteResult>> future = batch.commit();
+
+            try {
+                for (WriteResult result : future.get()) {
+                    System.out.println("Update time : " + result.getUpdateTime());
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
             }
         });
     }
@@ -145,7 +159,7 @@ public class Main {
         );
     }
 
-    private static HashMap<String, Object> createOpeningHoursHashMap(FetchedOpeningHours openingHours){
+    private static HashMap<String, Object> createOpeningHoursHashMap(FetchedOpeningHours openingHours) {
         HashMap<String, Object> h = new HashMap<>();
         h.put("isOpen", openingHours.isOpen());
         h.put("opensAt", openingHours.getOpeningAt());
@@ -155,7 +169,7 @@ public class Main {
         return h;
     }
 
-    private static HashMap<String, Object> createCanteenHashMap (Integer id, FetchedCanteen canteen){
+    private static HashMap<String, Object> createCanteenHashMap(Integer id, FetchedCanteen canteen) {
         HashMap<String, Object> h = new HashMap<>();
         h.put("id", id);
         h.put("info", canteen.getTitleInfo());

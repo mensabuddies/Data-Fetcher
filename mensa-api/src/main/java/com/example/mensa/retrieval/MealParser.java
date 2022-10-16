@@ -70,9 +70,9 @@ public class MealParser implements Parser<FetchedMeal> {
 
         for (Element e : elements) {
             if (isAllergen) {
-                sb.append(e.text()).append(",");
+                    sb.append(e.text()).append(",");
             } else {
-                sb.append(e.attr("title")).append(",");
+                    sb.append(e.attr("title")).append(",");
             }
         }
         return sb.substring(0, sb.length() - 1);
