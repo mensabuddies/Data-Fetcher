@@ -48,6 +48,7 @@ public class Main implements BackgroundFunction<PubSubMessage> {
     }
 
     public static void mainFunction() throws IOException, ExecutionException, InterruptedException {
+        // For local testing
         /*
         FileInputStream serviceAccount = new FileInputStream("./AdminKey.json");
 
