@@ -27,6 +27,10 @@ public class Main {
     private static final int ALLERGENS = 1;
     private static final int INGREDIENTS = 2;
 
+    private static WriteBatch batch = null;
+
+    private static Firestore db = null;
+
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         FileInputStream serviceAccount = new FileInputStream("./AdminKey.json");
 
@@ -36,14 +40,14 @@ public class Main {
 
         FirebaseApp.initializeApp(options);
 
-        Firestore db = FirestoreClient.getFirestore();
+        db = FirestoreClient.getFirestore();
 
         Optional<FetchedData> dataFetcher = new DataFetcher().fetchCurrentData();
 
         var additives = new HashMap<Integer, Set<String>>();
         CollectionReference additivesReference = db.collection("additives");
 
-        WriteBatch batch = db.batch();
+        batch = db.batch();
 
         dataFetcher.ifPresent(data -> {
             var f = data.getFetchedFoodProviders();
@@ -66,14 +70,14 @@ public class Main {
 
             for (var allergen : additives.get(ALLERGENS)) {
                 if (!allergen.isBlank())
-                    batch.set(additivesReference.document(allergen.replace("/", "-")), Map.of(
+                    setAndCommitIfNeeded(additivesReference.document(allergen.replace("/", "-")), Map.of(
                             "type", "allergen",
                             "name", allergen
                     ));
             }
             for (var ingredient : additives.get(INGREDIENTS)) {
                 if (!ingredient.isBlank())
-                    batch.set(additivesReference.document(ingredient.replace("/", "-")), Map.of(
+                    setAndCommitIfNeeded(additivesReference.document(ingredient.replace("/", "-")), Map.of(
                             "type", "ingredient",
                             "name", ingredient
                     ));
@@ -103,13 +107,13 @@ public class Main {
         var foodProviderHashMap = createFoodProviderHashMap(id, foodProvider);
 
 
-        batch.set(foodProviderRef, foodProviderHashMap);
+        setAndCommitIfNeeded(foodProviderRef, foodProviderHashMap);
 
         CollectionReference foodProviderDescriptionReference = foodProviderRef
                 .collection("descriptions");
 
-        batch.set(foodProviderDescriptionReference.document("de"), Map.of("value", foodProvider.getDescription()));
-        batch.set(foodProviderDescriptionReference.document("en"), Map.of("value", foodProvider.getDescription()));
+        setAndCommitIfNeeded(foodProviderDescriptionReference.document("de"), Map.of("value", foodProvider.getDescription()));
+        setAndCommitIfNeeded(foodProviderDescriptionReference.document("en"), Map.of("value", foodProvider.getDescription()));
 
         // Menus --------------------------------------------------------------------------------------
         if (foodProvider.getType() == FetchedFoodProviderType.CANTEEN) {
@@ -117,12 +121,16 @@ public class Main {
 
             for (var menu : foodProvider.getMenus()) {
                 for (var meal : menu.getMeals()) {
-                    DocumentReference mealReference = canteenMenuReference
-                            .document(menu.getDate().toString())
+                    DocumentReference menuReference = canteenMenuReference
+                            .document(menu.getDate().toString());
+
+                    setAndCommitIfNeeded(menuReference, Map.of("date", menu.getDate().toString()));
+
+                    DocumentReference mealReference = menuReference
                             .collection("meals")
                             .document(meal.getName());
 
-                    batch.set(mealReference, createMealHashMap(meal));
+                    setAndCommitIfNeeded(mealReference, createMealHashMap(meal));
 
 
                     if (!additives.containsKey(ALLERGENS)) {
@@ -155,7 +163,7 @@ public class Main {
         CollectionReference openingHoursRef = foodProviderRef.collection("openingHours");
 
         for (FetchedOpeningHours o : foodProvider.getOpeningHours()) {
-            batch.set(
+            setAndCommitIfNeeded(
                     openingHoursRef.document(o.getWeekday().getDisplayName(TextStyle.FULL, Locale.GERMAN)), // TODO: Maybe change this to just the number?
                     createOpeningHoursHashMap(o));
         }
@@ -207,13 +215,36 @@ public class Main {
         return h;
     }
 
-    public static String capitalize(String str) {
+    private static String capitalize(String str) {
         if(str == null || str.isEmpty()) {
             return str;
         }
 
         return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
+
+    private static void commitIfNeeded() {
+        if (batch.getMutationsSize() >= 500) {
+            ApiFuture<List<WriteResult>> future = batch.commit();
+
+            try {
+                for (WriteResult result : future.get()) {
+                    System.out.println("Update time : " + result.getUpdateTime());
+                }
+                batch = db.batch();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private static void setAndCommitIfNeeded(DocumentReference df, Map<String, Object> value) {
+        commitIfNeeded();
+        batch.set(df, value);
+    }
+
 
     private static String mealPriceToString(int price) {
         DecimalFormat d = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.GERMANY));
