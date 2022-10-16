@@ -171,6 +171,7 @@ public class Main {
 
     private static Map<String, Object> createMealHashMap(FetchedMeal meal) {
         return Map.of(
+                "name", meal.getName(),
                 "priceGuest", mealPriceToString(meal.getPriceGuest()),
                 "priceEmployee", mealPriceToString(meal.getPriceEmployee()),
                 "priceStudent", mealPriceToString(meal.getPriceStudent()),
@@ -185,7 +186,7 @@ public class Main {
         h.put("opensAt", openingHours.getOpeningAt());
         h.put("closesAt", openingHours.getClosingAt());
         h.put("getFoodTill", openingHours.getGetAMealTill());
-
+        h.put("dayOfWeek", openingHours.getWeekday().ordinal());
         return h;
     }
 
