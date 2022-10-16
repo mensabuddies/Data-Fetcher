@@ -112,8 +112,14 @@ public class Main {
         CollectionReference foodProviderDescriptionReference = foodProviderRef
                 .collection("descriptions");
 
-        setAndCommitIfNeeded(foodProviderDescriptionReference.document("de"), Map.of("value", foodProvider.getDescription()));
-        setAndCommitIfNeeded(foodProviderDescriptionReference.document("en"), Map.of("value", foodProvider.getDescription()));
+        setAndCommitIfNeeded(foodProviderDescriptionReference.document(Locale.GERMAN.getLanguage()), Map.of(
+                "description", foodProvider.getDescription(),
+                "language", Locale.GERMAN.getLanguage()
+        ));
+        setAndCommitIfNeeded(foodProviderDescriptionReference.document(Locale.ENGLISH.getLanguage()), Map.of(
+                "value", "not yet implemented",
+                "language", Locale.ENGLISH.getLanguage()
+        ));
 
         // Menus --------------------------------------------------------------------------------------
         if (foodProvider.getType() == FetchedFoodProviderType.CANTEEN) {
