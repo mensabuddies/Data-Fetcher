@@ -2,6 +2,8 @@ package com.example.mensa;
 
 import com.example.mensa.dataclasses.FetchedCanteen;
 import com.example.mensa.dataclasses.FetchedData;
+import com.example.mensa.dataclasses.enums.FetchedFoodProviderType;
+import com.example.mensa.dataclasses.interfaces.FetchedFoodProvider;
 import com.example.mensa.dataclasses.interfaces.FetchedMeal;
 import com.example.mensa.dataclasses.interfaces.FetchedOpeningHours;
 import com.example.mensa.retrieval.DataFetcher;
@@ -51,78 +53,16 @@ public class Main {
         WriteBatch batch = db.batch();
 
         dataFetcher.ifPresent(data -> {
-            var c = data.getFetchedCanteens();
+            var f = data.getFetchedFoodProviders();
             Integer id = 1;
-            for (FetchedCanteen canteen : c) {
-                var canteenHashMap = createCanteenHashMap(id, canteen);
-
-
-                DocumentReference canteenRef = db
-                        .collection("canteens")
-                        .document("location")
-                        .collection(canteen.getLocation().getValue())
-                        .document(canteen.getName());
-                batch.set(canteenRef, canteenHashMap);
-
-                CollectionReference canteenDescriptionReference = canteenRef
-                        .collection("descriptions");
-
-                batch.set(canteenDescriptionReference.document("de"), Map.of("value", canteen.getDescription()));
-                batch.set(canteenDescriptionReference.document("en"), Map.of("value", canteen.getDescription()));
-
-                // Menus --------------------------------------------------------------------------------------
-                CollectionReference canteenMenuReference = canteenRef.collection("menus");
-
-                for (var menu : canteen.getMenus()) {
-                    for (var meal : menu.getMeals()) {
-                        DocumentReference mealReference = canteenMenuReference
-                                .document(menu.getDate().toString())
-                                .collection("meals")
-                                .document(meal.getName());
-
-                        batch.set(mealReference, createMealHashMap(meal));
-
-                        /*
-                            Some formatting has to be done. For example "Rind/Kalb" is interpreted as a path
-                            so replace '/' with something else
-
-                            TODO: Some additives are both allergen and ingredient. As there are only a few ingredients
-                            TODO: they should be classified as ingredient (they are usually ingredients in first place)
-                         */
-
-                        if (!additives.containsKey(ALLERGENS)) {
-                            var hashSet = new HashSet<>(List.of(meal.getAllergensRaw().replace("/", "-").split(",")));
-                            additives.put(ALLERGENS, hashSet);
-                        } else {
-                            var temp = additives.get(ALLERGENS);
-                            temp.addAll(
-                                    Set.of(meal.getAllergensRaw().replace("/", "-").split(","))
-                            );
-                            additives.put(ALLERGENS, temp);
-                        }
-
-                        if (!additives.containsKey(INGREDIENTS)) {
-                            var hashSet = new HashSet<>(List.of(meal.getIngredientsRaw().replace("/", "-").split(",")));
-                            additives.put(INGREDIENTS, hashSet);
-                        } else {
-                            var temp = additives.get(INGREDIENTS);
-                            temp.addAll(
-                                    Set.of(meal.getIngredientsRaw().replace("/", "-").split(","))
-                            );
-                            additives.put(INGREDIENTS, temp);
-                        }
-                    }
-                }
-                // --------------------------------------------------------------------------------------
-
-                // Opening Hours
-                CollectionReference openingHoursRef = canteenRef.collection("openingHours");
-
-                for (FetchedOpeningHours o : canteen.getOpeningHours()) {
-                    batch.set(
-                            openingHoursRef.document(o.getWeekday().getDisplayName(TextStyle.FULL, Locale.GERMAN)),
-                            createOpeningHoursHashMap(o));
-                }
+            for (FetchedFoodProvider foodProvider : f) {
+                createFoodProviderEntry(
+                        id,
+                        batch,
+                        foodProvider,
+                        db,
+                        additives
+                );
                 id++;
             }
 
@@ -149,6 +89,84 @@ public class Main {
         });
     }
 
+    private static void createFoodProviderEntry(int id, WriteBatch batch, FetchedFoodProvider foodProvider, Firestore db, HashMap<Integer, Set<String>> additives) {
+        var type = foodProvider.getType().getValue();
+
+        DocumentReference foodProviderRef = db
+                .collection(type)
+                .document("location")
+                .collection(foodProvider.getLocation().getValue())
+                .document(foodProvider.getName());
+
+        var foodProviderHashMap = createFoodProviderHashMap(id, foodProvider);
+
+
+
+        batch.set(foodProviderRef, foodProviderHashMap);
+
+        CollectionReference foodProviderDescriptionReference = foodProviderRef
+                .collection("descriptions");
+
+        batch.set(foodProviderDescriptionReference.document("de"), Map.of("value", foodProvider.getDescription()));
+        batch.set(foodProviderDescriptionReference.document("en"), Map.of("value", foodProvider.getDescription()));
+
+        // Menus --------------------------------------------------------------------------------------
+        if (foodProvider.getType() == FetchedFoodProviderType.CANTEEN) {
+            CollectionReference canteenMenuReference = foodProviderRef.collection("menus");
+
+            for (var menu : foodProvider.getMenus()) {
+                for (var meal : menu.getMeals()) {
+                    DocumentReference mealReference = canteenMenuReference
+                            .document(menu.getDate().toString())
+                            .collection("meals")
+                            .document(meal.getName());
+
+                    batch.set(mealReference, createMealHashMap(meal));
+
+                            /*
+                                Some formatting has to be done. For example "Rind/Kalb" is interpreted as a path
+                                so replace '/' with something else
+
+                                TODO: Some additives are both allergen and ingredient. As there are only a few ingredients
+                                TODO: they should be classified as ingredient (they are usually ingredients in first place)
+                             */
+
+                    if (!additives.containsKey(ALLERGENS)) {
+                        var hashSet = new HashSet<>(List.of(meal.getAllergensRaw().replace("/", "-").split(",")));
+                        additives.put(ALLERGENS, hashSet);
+                    } else {
+                        var temp = additives.get(ALLERGENS);
+                        temp.addAll(
+                                Set.of(meal.getAllergensRaw().replace("/", "-").split(","))
+                        );
+                        additives.put(ALLERGENS, temp);
+                    }
+
+                    if (!additives.containsKey(INGREDIENTS)) {
+                        var hashSet = new HashSet<>(List.of(meal.getIngredientsRaw().replace("/", "-").split(",")));
+                        additives.put(INGREDIENTS, hashSet);
+                    } else {
+                        var temp = additives.get(INGREDIENTS);
+                        temp.addAll(
+                                Set.of(meal.getIngredientsRaw().replace("/", "-").split(","))
+                        );
+                        additives.put(INGREDIENTS, temp);
+                    }
+                }
+            }
+        }
+        // --------------------------------------------------------------------------------------
+
+        // Opening Hours
+        CollectionReference openingHoursRef = foodProviderRef.collection("openingHours");
+
+        for (FetchedOpeningHours o : foodProvider.getOpeningHours()) {
+            batch.set(
+                    openingHoursRef.document(o.getWeekday().getDisplayName(TextStyle.FULL, Locale.GERMAN)), // TODO: Maybe change this to just the number?
+                    createOpeningHoursHashMap(o));
+        }
+    }
+
     private static Map<String, Object> createMealHashMap(FetchedMeal meal) {
         return Map.of(
                 "priceGuest", mealPriceToString(meal.getPriceGuest()),
@@ -169,12 +187,12 @@ public class Main {
         return h;
     }
 
-    private static HashMap<String, Object> createCanteenHashMap(Integer id, FetchedCanteen canteen) {
+    private static HashMap<String, Object> createFoodProviderHashMap(Integer id, FetchedFoodProvider foodProvider) {
         HashMap<String, Object> h = new HashMap<>();
         h.put("id", id);
-        h.put("info", canteen.getTitleInfo());
-        h.put("additionalInfo", canteen.getBodyInfo());
-        h.put("address", canteen.getAddress());
+        h.put("info", foodProvider.getTitleInfo());
+        h.put("additionalInfo", foodProvider.getBodyInfo());
+        h.put("address", foodProvider.getAddress());
 
         return h;
     }
