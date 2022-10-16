@@ -47,6 +47,13 @@ public class Main implements BackgroundFunction<PubSubMessage> {
         mainFunction();
     }
 
+    // For local testing
+    /*
+    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
+        mainFunction();
+    }
+    */
+
     public static void mainFunction() throws IOException, ExecutionException, InterruptedException {
         // For local testing
         /*
@@ -57,7 +64,12 @@ public class Main implements BackgroundFunction<PubSubMessage> {
                 .build();
          */
 
-        FirebaseApp.initializeApp();
+        FirebaseOptions options = FirebaseOptions.builder()
+                .setProjectId("1011527222787")
+                .setCredentials(GoogleCredentials.getApplicationDefault())
+                .build();
+
+        FirebaseApp.initializeApp(options);
 
         db = FirestoreClient.getFirestore();
 
