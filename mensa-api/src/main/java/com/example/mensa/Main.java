@@ -1,7 +1,7 @@
 package com.example.mensa;
 
-import com.example.mensa.dataclasses.FetchedCanteen;
 import com.example.mensa.dataclasses.FetchedData;
+import com.example.mensa.dataclasses.PubSubMessage;
 import com.example.mensa.dataclasses.enums.FetchedFoodProviderType;
 import com.example.mensa.dataclasses.interfaces.FetchedFoodProvider;
 import com.example.mensa.dataclasses.interfaces.FetchedMeal;
@@ -10,9 +10,14 @@ import com.example.mensa.retrieval.DataFetcher;
 import com.google.api.core.ApiFuture;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.*;
+import com.google.cloud.functions.Context;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
+import com.google.cloud.functions.BackgroundFunction;
+import java.util.Base64;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,7 +27,7 @@ import java.time.format.TextStyle;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-public class Main {
+public class Main implements BackgroundFunction<PubSubMessage> {
 
     private static final int ALLERGENS = 1;
     private static final int INGREDIENTS = 2;
@@ -31,11 +36,37 @@ public class Main {
 
     private static Firestore db = null;
 
+    private static final Logger logger = Logger.getLogger(Main.class.getName());
+
+    @Override
+    public void accept(PubSubMessage message, Context context) throws Exception {
+        String data = message.data != null
+                ? new String(Base64.getDecoder().decode(message.data))
+                : "Hello, World";
+        logger.info(data);
+        mainFunction();
+    }
+
+    // For local testing
+    /*
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
+        mainFunction();
+    }
+    */
+
+    public static void mainFunction() throws IOException, ExecutionException, InterruptedException {
+        // For local testing
+        /*
         FileInputStream serviceAccount = new FileInputStream("./AdminKey.json");
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .build();
+         */
+
+        FirebaseOptions options = FirebaseOptions.builder()
+                .setProjectId("1011527222787")
+                .setCredentials(GoogleCredentials.getApplicationDefault())
                 .build();
 
         FirebaseApp.initializeApp(options);
