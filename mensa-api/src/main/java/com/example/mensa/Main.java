@@ -15,6 +15,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.cloud.functions.BackgroundFunction;
+
 import java.util.Base64;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -26,8 +27,11 @@ import java.text.DecimalFormatSymbols;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class Main implements BackgroundFunction<PubSubMessage> {
+
+    private static final boolean DEBUG = false;
 
     private static final int ALLERGENS = 1;
     private static final int INGREDIENTS = 2;
@@ -48,29 +52,27 @@ public class Main implements BackgroundFunction<PubSubMessage> {
     }
 
     // For local testing
-    /*
+/*
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         mainFunction();
     }
-    */
 
+*/
     public static void mainFunction() throws IOException, ExecutionException, InterruptedException {
-        // For local testing
-        /*
-        FileInputStream serviceAccount = new FileInputStream("./AdminKey.json");
+        FirebaseOptions options;
+        if (DEBUG) {
+            FileInputStream serviceAccount = new FileInputStream("./AdminKey.json");
 
-        FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .build();
-         */
-
-        FirebaseOptions options = FirebaseOptions.builder()
-                .setProjectId("1011527222787")
-                .setCredentials(GoogleCredentials.getApplicationDefault())
-                .build();
-
+            options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .build();
+        } else {
+            options = FirebaseOptions.builder()
+                    .setProjectId("1011527222787")
+                    .setCredentials(GoogleCredentials.getApplicationDefault())
+                    .build();
+        }
         FirebaseApp.initializeApp(options);
-
         db = FirestoreClient.getFirestore();
 
         Optional<FetchedData> dataFetcher = new DataFetcher().fetchCurrentData();
@@ -196,14 +198,6 @@ public class Main implements BackgroundFunction<PubSubMessage> {
         }
         // --------------------------------------------------------------------------------------
 
-        // Opening Hours
-        CollectionReference openingHoursRef = foodProviderRef.collection("openingHours");
-
-        for (FetchedOpeningHours o : foodProvider.getOpeningHours()) {
-            setAndCommitIfNeeded(
-                    openingHoursRef.document(o.getWeekday().getDisplayName(TextStyle.FULL, Locale.GERMAN)), // TODO: Maybe change this to just the number?
-                    createOpeningHoursHashMap(o));
-        }
     }
 
     private static Map<String, Object> createMealHashMap(FetchedMeal meal) {
@@ -217,17 +211,21 @@ public class Main implements BackgroundFunction<PubSubMessage> {
         );
     }
 
-    private static HashMap<String, Object> createOpeningHoursHashMap(FetchedOpeningHours openingHours) {
-        HashMap<String, Object> h = new HashMap<>();
-        h.put("isOpen", openingHours.isOpen());
-        h.put("opensAt", openingHours.getOpeningAt());
-        h.put("closesAt", openingHours.getClosingAt());
-        h.put("getFoodTill", openingHours.getGetAMealTill());
-        h.put("dayOfWeek", openingHours.getWeekday().ordinal());
+    private static Map<String, List<Object>> createOpeningHoursHashMap(List<FetchedOpeningHours> openingHours) {
+        HashMap<String, List<Object>> h = new HashMap<>();
+        var sorted = openingHours.stream().sorted(Comparator.comparingInt(o -> o.getWeekday().ordinal())).toList();
+        for (var openingHour : sorted) {
+            List<Object> array = new ArrayList<>();
+            array.add(openingHour.getOpeningAt());
+            array.add(openingHour.getClosingAt());
+            array.add(openingHour.getGetAMealTill());
+            array.add(openingHour.isOpen());
+            h.put("hours_" + openingHour.getWeekday().getDisplayName(TextStyle.SHORT_STANDALONE, Locale.ENGLISH).toLowerCase(), array);
+        }
         return h;
     }
 
-    private static HashMap<String, Object> createFoodProviderHashMap(Integer id, FetchedFoodProvider foodProvider) {
+    private static HashMap<String, ?> createFoodProviderHashMap(Integer id, FetchedFoodProvider foodProvider) {
         HashMap<String, Object> h = new HashMap<>();
 
         // e.g. "Mensateria Campus Hubland Nord Würzburg"
@@ -250,11 +248,21 @@ public class Main implements BackgroundFunction<PubSubMessage> {
         h.put("name", name);
         h.put("location", foodProvider.getLocation().getValue());
 
+        var sorted = foodProvider.getOpeningHours().stream().sorted(Comparator.comparingInt(o -> o.getWeekday().ordinal())).toList();
+        for (var openingHour : sorted) {
+            List<Object> array = new ArrayList<>();
+            array.add(openingHour.getOpeningAt());
+            array.add(openingHour.getClosingAt());
+            array.add(openingHour.getGetAMealTill());
+            array.add(openingHour.isOpen());
+            h.put("hours_" + openingHour.getWeekday().getDisplayName(TextStyle.SHORT_STANDALONE, Locale.ENGLISH).toLowerCase(), array);
+        }
+
         return h;
     }
 
     private static String capitalize(String str) {
-        if(str == null || str.isEmpty()) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
 
@@ -278,7 +286,7 @@ public class Main implements BackgroundFunction<PubSubMessage> {
         }
     }
 
-    private static void setAndCommitIfNeeded(DocumentReference df, Map<String, Object> value) {
+    private static void setAndCommitIfNeeded(DocumentReference df, Map<String, ?> value) {
         commitIfNeeded();
         batch.set(df, value);
     }
