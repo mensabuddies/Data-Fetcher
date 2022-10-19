@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -167,7 +169,7 @@ public class Main implements BackgroundFunction<PubSubMessage> {
                     DocumentReference mealReference = canteenMenuReference
                             .document(); // Each meal gets an automatic ID, since one meal may occur more than once
 
-                    setAndCommitIfNeeded(mealReference, createMealHashMap(meal, menu.getDate().toString(), id));
+                    setAndCommitIfNeeded(mealReference, createMealHashMap(meal, dateFromLocalDate(menu.getDate()), id));
 
 
                     if (!additives.containsKey(ALLERGENS)) {
@@ -198,7 +200,7 @@ public class Main implements BackgroundFunction<PubSubMessage> {
 
     }
 
-    private static Map<String, Object> createMealHashMap(FetchedMeal meal, String date, Integer foodProviderId) {
+    private static Map<String, Object> createMealHashMap(FetchedMeal meal, Date date, Integer foodProviderId) {
         return Map.of(
                 "name", meal.getName(),
                 "foodProviderId", foodProviderId,
@@ -312,5 +314,9 @@ public class Main implements BackgroundFunction<PubSubMessage> {
     private static String mealPriceToString(int price) {
         DecimalFormat d = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.GERMANY));
         return d.format(price / 100.0) + " \u20ac";
+    }
+
+    private static Date dateFromLocalDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 }
