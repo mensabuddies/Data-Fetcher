@@ -10,23 +10,21 @@ import com.example.mensa.retrieval.DataFetcher;
 import com.google.api.core.ApiFuture;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.*;
+import com.google.cloud.functions.BackgroundFunction;
 import com.google.cloud.functions.Context;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
-import com.google.cloud.functions.BackgroundFunction;
-
-import java.util.Base64;
-import java.util.Map;
-import java.util.logging.Logger;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.DayOfWeek;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Main implements BackgroundFunction<PubSubMessage> {
@@ -56,8 +54,8 @@ public class Main implements BackgroundFunction<PubSubMessage> {
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         mainFunction();
     }
-
 */
+
     public static void mainFunction() throws IOException, ExecutionException, InterruptedException {
         FirebaseOptions options;
         if (DEBUG) {
@@ -160,16 +158,16 @@ public class Main implements BackgroundFunction<PubSubMessage> {
 
             for (var menu : foodProvider.getMenus()) {
                 for (var meal : menu.getMeals()) {
-                    DocumentReference menuReference = canteenMenuReference
-                            .document(menu.getDate().toString());
+                    //DocumentReference menuReference = canteenMenuReference
+                    //        .document(menu.getDate().toString());
 
-                    setAndCommitIfNeeded(menuReference, Map.of("date", menu.getDate().toString()));
+                    // Save date in meal, not menu
+                    // setAndCommitIfNeeded(menuReference, Map.of("date", menu.getDate().toString()));
 
-                    DocumentReference mealReference = menuReference
-                            .collection("meals")
-                            .document(meal.getName());
+                    DocumentReference mealReference = canteenMenuReference
+                            .document(); // Each meal gets an automatic ID, since one meal may occur more than once
 
-                    setAndCommitIfNeeded(mealReference, createMealHashMap(meal));
+                    setAndCommitIfNeeded(mealReference, createMealHashMap(meal, menu.getDate().toString(), id));
 
 
                     if (!additives.containsKey(ALLERGENS)) {
@@ -200,9 +198,11 @@ public class Main implements BackgroundFunction<PubSubMessage> {
 
     }
 
-    private static Map<String, Object> createMealHashMap(FetchedMeal meal) {
+    private static Map<String, Object> createMealHashMap(FetchedMeal meal, String date, Integer foodProviderId) {
         return Map.of(
                 "name", meal.getName(),
+                "foodProviderId", foodProviderId,
+                "date", date,
                 "priceGuest", mealPriceToString(meal.getPriceGuest()),
                 "priceEmployee", mealPriceToString(meal.getPriceEmployee()),
                 "priceStudent", mealPriceToString(meal.getPriceStudent()),
@@ -211,18 +211,26 @@ public class Main implements BackgroundFunction<PubSubMessage> {
         );
     }
 
-    private static Map<String, List<Object>> createOpeningHoursHashMap(List<FetchedOpeningHours> openingHours) {
-        HashMap<String, List<Object>> h = new HashMap<>();
-        var sorted = openingHours.stream().sorted(Comparator.comparingInt(o -> o.getWeekday().ordinal())).toList();
+    private static List<Object> createOpeningHoursList(DayOfWeek dayOfWeek, List<FetchedOpeningHours> openingHours) {
+        List<Object> array = new ArrayList<>();
+        // For data consistency the opening hours of one day should be sorted according to openingAt
+        var sorted = openingHours.stream().filter(o -> o.getWeekday() == dayOfWeek).sorted(new Comparator<FetchedOpeningHours>() {
+            @Override
+            public int compare(FetchedOpeningHours o1, FetchedOpeningHours o2) {
+                var value1 = Integer.valueOf(o1.getOpeningAt().replace(".", ""));
+                var value2 = Integer.valueOf(o2.getOpeningAt().replace(".", ""));
+                return value1.compareTo(value2);
+            }
+        }).toList();
+
+
         for (var openingHour : sorted) {
-            List<Object> array = new ArrayList<>();
             array.add(openingHour.getOpeningAt());
             array.add(openingHour.getClosingAt());
             array.add(openingHour.getGetAMealTill());
             array.add(openingHour.isOpen());
-            h.put("hours_" + openingHour.getWeekday().getDisplayName(TextStyle.SHORT_STANDALONE, Locale.ENGLISH).toLowerCase(), array);
         }
-        return h;
+        return array;
     }
 
     private static HashMap<String, ?> createFoodProviderHashMap(Integer id, FetchedFoodProvider foodProvider) {
@@ -248,14 +256,23 @@ public class Main implements BackgroundFunction<PubSubMessage> {
         h.put("name", name);
         h.put("location", foodProvider.getLocation().getValue());
 
-        var sorted = foodProvider.getOpeningHours().stream().sorted(Comparator.comparingInt(o -> o.getWeekday().ordinal())).toList();
+        var sorted = foodProvider
+                .getOpeningHours().stream()
+                .sorted(
+                        Comparator.comparingInt(o -> o.getWeekday().ordinal())
+                ).toList();
+
         for (var openingHour : sorted) {
-            List<Object> array = new ArrayList<>();
-            array.add(openingHour.getOpeningAt());
-            array.add(openingHour.getClosingAt());
-            array.add(openingHour.getGetAMealTill());
-            array.add(openingHour.isOpen());
-            h.put("hours_" + openingHour.getWeekday().getDisplayName(TextStyle.SHORT_STANDALONE, Locale.ENGLISH).toLowerCase(), array);
+            h.put("hours_" +
+                            openingHour
+                                    .getWeekday()
+                                    .getDisplayName(TextStyle.SHORT_STANDALONE, Locale.ENGLISH)
+                                    .toLowerCase(),
+                    createOpeningHoursList(
+                            openingHour.getWeekday(),
+                            foodProvider.getOpeningHours()
+                    )
+            );
         }
 
         return h;

@@ -12,6 +12,7 @@ import org.jsoup.select.Elements;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -180,11 +181,17 @@ public class FoodProviderParser implements Parser<FetchedFoodProvider> {
             Elements tableRowItems = tableRow.children();
 
             // Do we have opening hours?
-            if (tableRowItems.size() > 2) {
-                String[] hours = tableRowItems.get(1).text().split(" - | ");
+            if (tableRowItems.size() > 2 || (isCafeteria && tableRowItems.size() == 2)) {
+                String[] hours = Arrays.stream(tableRowItems.get(1).text().split(" - | ")).map(o -> o.replace("-", "")).toArray(String[]::new);
                 String mealOutTill = "";
-                if (!tableRowItems.get(2).text().isEmpty()) {
-                    mealOutTill = tableRowItems.get(2).text().split(" ")[2];
+                if (tableRowItems.size() == 3 && !tableRowItems.get(2).text().isEmpty()) {
+                    if (isCafeteria) {
+                        fetchedOpeningHoursList.addAll(constructOpeningHours(
+                                new Elements(new Element("dummyTableRows").appendChildren(
+                                        List.of(tableRowItems.get(0), tableRowItems.get(2), new Element("td"))
+                                )), isCafeteria));
+                    } else
+                        mealOutTill = tableRowItems.get(2).text().split(" ")[2];
                 }
                 int numberOfLoopExecutions = weekdaysToIteratorNumber(tableRowItems.get(0).text());
 
