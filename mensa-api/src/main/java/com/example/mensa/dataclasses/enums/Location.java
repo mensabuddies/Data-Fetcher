@@ -1,7 +1,9 @@
 package com.example.mensa.dataclasses.enums;
 
+import java.nio.charset.StandardCharsets;
+
 public enum Location {
-    WUERZBURG("Würzburg"),
+    WUERZBURG("W\u00fcrzburg"),
     BAMBERG("Bamberg"),
     SCHWEINFURT("Schweinfurt"),
     ASCHAFFENBURG("Aschaffenburg"),
@@ -21,9 +23,9 @@ public enum Location {
     public String getValueFormatted() {
         return value
                 .toLowerCase()
-                .replace("ä", "ae")
-                .replace("ö", "oe")
-                .replace("ü", "ue")
-                .replace("ß", "ss");
+                .replace("\u00e4", "ae")
+                .replace("\u00f6", "oe")
+                .replace("\u00fc", "ue")
+                .replace("\u00df", "ss");
     }
 }
