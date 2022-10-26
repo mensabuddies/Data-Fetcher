@@ -68,11 +68,18 @@ public class Main implements BackgroundFunction<PubSubMessage> {
                     .build();
         } else {
             options = FirebaseOptions.builder()
-                    .setProjectId("1011527222787")
+                    .setProjectId("mensa-api-v2")
                     .setCredentials(GoogleCredentials.getApplicationDefault())
+                    .setDatabaseUrl("https://mensa-api-v2.firebaseio.com/")
                     .build();
         }
-        FirebaseApp.initializeApp(options);
+
+        if(FirebaseApp.getApps().isEmpty()){
+            FirebaseApp.initializeApp(options);
+        } else {
+            FirebaseApp.getApps().get(0);
+        }
+
         db = FirestoreClient.getFirestore();
 
         Optional<FetchedData> dataFetcher = new DataFetcher().fetchCurrentData();
