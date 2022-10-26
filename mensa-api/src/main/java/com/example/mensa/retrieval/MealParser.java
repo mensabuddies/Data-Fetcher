@@ -54,9 +54,9 @@ public class MealParser implements Parser<FetchedMeal> {
                 .requireNonNull(fetched.getElementsByClass("icon").first())
                 .getElementsByClass("theicon");
 
-        String allergens = getString(allergensElements, true).replace("ue", "ü");
+        String allergens = getString(allergensElements, true).replace("ue", "\u00fc");
 
-        String ingredients = getString(ingredientsElements, false).replace("ue", "ü");
+        String ingredients = getString(ingredientsElements, false).replace("ue", "\u00fc");
 
         return Optional.of(FetchedMeal.createMeal(title, priceStudent, priceEmployee, priceGuest, allergens, ingredients));
     }
