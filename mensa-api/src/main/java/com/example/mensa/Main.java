@@ -174,7 +174,7 @@ public class Main implements BackgroundFunction<PubSubMessage> {
                     // setAndCommitIfNeeded(menuReference, Map.of("date", menu.getDate().toString()));
 
                     DocumentReference mealReference = canteenMenuReference
-                            .document(); // Each meal gets an automatic ID, since one meal may occur more than once
+                            .document(meal.getName() + "_" + menu.getDate()); // Each meal gets a unique ID consisting of the name and date
 
                     setAndCommitIfNeeded(mealReference, createMealHashMap(meal, dateFromLocalDate(menu.getDate()), id));
 
