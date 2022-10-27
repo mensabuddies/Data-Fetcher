@@ -148,7 +148,7 @@ public class Main implements BackgroundFunction<PubSubMessage> {
 
 
         setAndCommitIfNeeded(foodProviderRef, foodProviderHashMap);
-
+/*
         CollectionReference foodProviderDescriptionReference = foodProviderRef
                 .collection("descriptions");
 
@@ -160,7 +160,7 @@ public class Main implements BackgroundFunction<PubSubMessage> {
                 "value", "not yet implemented",
                 "language", Locale.ENGLISH.getLanguage()
         ));
-
+*/
         // Menus --------------------------------------------------------------------------------------
         if (foodProvider.getType() == FetchedFoodProviderType.CANTEEN) {
             CollectionReference canteenMenuReference = foodProviderRef.collection("menus");
@@ -263,6 +263,7 @@ public class Main implements BackgroundFunction<PubSubMessage> {
         // Whether it is a mensateria, interimsmensa etc.
         h.put("type", type);
         h.put("name", name);
+        h.put("description_de", foodProvider.getDescription());
         h.put("location", foodProvider.getLocation().getValue());
 
         var sorted = foodProvider
