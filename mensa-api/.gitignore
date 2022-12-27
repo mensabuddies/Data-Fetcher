@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+/firebase-tools-instant-win.exe
+/firebase-debug.log
+/firestore-debug.log
+/ui-debug.log
+/AdminKey.json

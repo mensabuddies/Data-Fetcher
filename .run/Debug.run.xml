@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Debug" type="Application" factoryName="Application">
+    <envs>
+      <env name="FIRESTORE_EMULATOR_HOST" value="0.0.0.0:8080" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="com.example.mensa.Main" />
+    <module name="mensa-api" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
