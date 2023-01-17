@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 public class Main implements BackgroundFunction<PubSubMessage> {
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final int ALLERGENS = 1;
     private static final int INGREDIENTS = 2;
@@ -52,11 +52,11 @@ public class Main implements BackgroundFunction<PubSubMessage> {
     }
 
     // For local testing
-/*
+
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         mainFunction();
     }
-*/
+
 
     public static void mainFunction() throws IOException, ExecutionException, InterruptedException {
         FirebaseOptions options;
@@ -176,7 +176,7 @@ public class Main implements BackgroundFunction<PubSubMessage> {
                     DocumentReference mealReference = canteenMenuReference
                             .document(meal.getName() + "_" + menu.getDate()); // Each meal gets a unique ID consisting of the name and date
 
-                    setAndCommitIfNeeded(mealReference, createMealHashMap(meal, dateFromLocalDate(menu.getDate()), id));
+                    setAndCommitIfNeeded(mealReference, createMealHashMap(meal, menu.getDate(), id));
 
 
                     if (!additives.containsKey(ALLERGENS)) {
@@ -207,11 +207,12 @@ public class Main implements BackgroundFunction<PubSubMessage> {
 
     }
 
-    private static Map<String, Object> createMealHashMap(FetchedMeal meal, Date date, Integer foodProviderId) {
+    private static Map<String, Object> createMealHashMap(FetchedMeal meal, LocalDate date, Integer foodProviderId) {
         return Map.of(
                 "name", meal.getName(),
                 "foodProviderId", foodProviderId,
-                "date", date,
+                "date", date.toString(),
+                "timestamp",  dateFromLocalDate(date),
                 "priceGuest", mealPriceToString(meal.getPriceGuest()),
                 "priceEmployee", mealPriceToString(meal.getPriceEmployee()),
                 "priceStudent", mealPriceToString(meal.getPriceStudent()),
@@ -321,10 +322,11 @@ public class Main implements BackgroundFunction<PubSubMessage> {
 
     private static String mealPriceToString(int price) {
         DecimalFormat d = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.GERMANY));
-        return d.format(price / 100.0) + " \u20ac";
+        return d.format(price / 100.0) + "\u20ac";
     }
 
     private static Date dateFromLocalDate(LocalDate localDate) {
+        // TODO: ZoneId of Google Cloud Server is different from most clients
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 }
