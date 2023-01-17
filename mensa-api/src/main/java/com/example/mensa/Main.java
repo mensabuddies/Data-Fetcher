@@ -212,6 +212,7 @@ public class Main implements BackgroundFunction<PubSubMessage> {
                 "name", meal.getName(),
                 "foodProviderId", foodProviderId,
                 "date", date.toString(),
+                "timestamp",  dateFromLocalDate(date),
                 "priceGuest", mealPriceToString(meal.getPriceGuest()),
                 "priceEmployee", mealPriceToString(meal.getPriceEmployee()),
                 "priceStudent", mealPriceToString(meal.getPriceStudent()),
@@ -325,6 +326,7 @@ public class Main implements BackgroundFunction<PubSubMessage> {
     }
 
     private static Date dateFromLocalDate(LocalDate localDate) {
+        // TODO: ZoneId of Google Cloud Server is different from most clients
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 }
